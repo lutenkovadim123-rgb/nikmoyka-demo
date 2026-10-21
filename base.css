@@ -1,0 +1,207 @@
+/* Музейный зал у Кремля: тёмный зал, медный свет логотипа, текст как таблички экспонатов. */
+:root {
+  --ink: #0a0807;        /* стены зала */
+  --ink-2: #14100d;      /* подиум, панели */
+  --copper: #c9875a;     /* кромка логотипа */
+  --copper-hi: #f2c39a;  /* блик на меди */
+  --steel: #b9b4ae;      /* шлифованный металл букв */
+  --paper: #efe9e2;      /* текст */
+  --muted: #8f857c;      /* подписи */
+  --line: rgba(201, 135, 90, .22);
+  --f-display: "Tenor Sans", "Times New Roman", serif;
+  --f-body: "Golos Text", "Segoe UI", Roboto, Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+body { margin: 0; }
+html { background: var(--ink); overflow-x: clip; }
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 60; background: var(--ink);
+}
+/* зерно поверх всего — как плёнка на музейной съёмке */
+body::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 70; opacity: .07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+a { color: inherit; }
+.wrap {
+  width: 100%; max-width: 1240px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* шапка */
+.top {
+  position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; z-index: 50;
+  transition: background .4s, border-color .4s;
+  border-bottom: 1px solid transparent;
+}
+.top.is-solid { background: rgba(10, 8, 7, .78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-color: var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 24px; height: 64px; }
+.top__logo { height: 34px; width: auto; opacity: 0; transform: translateY(-6px); transition: opacity .5s, transform .5s; }
+.top.is-solid .top__logo { opacity: 1; transform: none; }
+.top nav { display: flex; gap: 22px; margin-left: auto; font-size: 14px; color: var(--muted); }
+.top nav a { text-decoration: none; transition: color .2s; }
+.top nav a:hover { color: var(--paper); }
+.top__variant { font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--copper); text-decoration: none; border: 1px solid var(--line); padding: 6px 10px; border-radius: 99px; }
+
+/* кнопки */
+.btn {
+  --mx: 0px; --my: 0px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 52px; padding: 0 26px; border-radius: 99px;
+  font: 500 15px/1 var(--f-body); letter-spacing: .01em; text-decoration: none;
+  cursor: pointer; border: 0; transform: translate(var(--mx), var(--my));
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), background .3s, color .3s, box-shadow .3s;
+}
+.btn--copper {
+  color: #1a100a;
+  background: linear-gradient(115deg, #8a5232 0%, var(--copper) 30%, var(--copper-hi) 50%, var(--copper) 70%, #8a5232 100%);
+  background-size: 220% 100%; background-position: 100% 0;
+  box-shadow: 0 10px 30px -12px rgba(201, 135, 90, .7);
+}
+.btn--copper:hover { background-position: 0 0; }
+.btn--ghost { color: var(--paper); background: rgba(239, 233, 226, .04); box-shadow: inset 0 0 0 1px rgba(239, 233, 226, .22); }
+.btn--ghost:hover { box-shadow: inset 0 0 0 1px var(--copper); color: var(--copper-hi); }
+.btn:focus-visible, a:focus-visible { outline: 2px solid var(--copper-hi); outline-offset: 3px; }
+
+/* первый экран: общий каркас, сама сцена — в варианте */
+.hero { position: relative; min-height: 100svh; display: grid; align-items: end; overflow: hidden; isolation: isolate; }
+.hero__stage { position: absolute; inset: 0; z-index: -1; }
+.hero__stage canvas { display: block; width: 100%; height: 100%; }
+.hero__stage::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to top, rgba(10, 8, 7, .92) 0%, rgba(10, 8, 7, .55) 28%, transparent 52%); }
+.hero__copy { padding-block: 0 clamp(32px, 6vh, 64px); display: grid; gap: 22px; justify-items: start; }
+@media (min-width: 980px) {
+  .hero__copy { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: 64px; align-items: end; }
+  .hero__copy .eyebrow { grid-column: 1; }
+  .hero__copy h1 { grid-column: 1; grid-row: 2 / span 3; align-self: end; max-width: 15em; font-size: clamp(40px, 3.9vw, 58px); }
+  .hero__lead { grid-row: 2; } .hero__actions { grid-row: 3; } .hero__meta { grid-row: 4; }
+  .hero__lead, .hero__actions, .hero__meta { grid-column: 2; }
+}
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--copper); }
+.hero h1 {
+  font-family: var(--f-display); font-weight: 400; margin: 0;
+  font-size: clamp(30px, 4.6vw, 62px); line-height: 1.06; letter-spacing: -.01em;
+  max-width: 16ch; text-wrap: balance;
+}
+.hero__lead { margin: 0; max-width: 46ch; color: rgba(239, 233, 226, .74); font-size: clamp(15px, 1.3vw, 17px); }
+.hero__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero__meta { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--f-mono); font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+.hero__meta b { color: var(--paper); font-weight: 500; }
+
+/* утверждение, подсвечивается по словам при прокрутке */
+.thesis { padding-block: clamp(90px, 16vh, 180px); }
+.thesis p {
+  font-family: var(--f-display); margin: 0; max-width: 20ch;
+  font-size: clamp(32px, 6vw, 84px); line-height: 1.04; letter-spacing: -.015em; text-wrap: balance;
+}
+.thesis .w { color: rgba(239, 233, 226, .16); transition: color .2s; }
+.thesis .w.on { color: var(--paper); }
+.thesis .w.cu.on { color: var(--copper-hi); }
+.thesis small { display: block; margin-top: 28px; font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+/* таблички экспонатов */
+.plaques { padding-block: 0 clamp(80px, 12vh, 140px); }
+.plaques__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.plaque { background: var(--ink); padding: 28px 24px 30px; display: grid; gap: 14px; align-content: start; min-height: 220px; position: relative; overflow: hidden; }
+.plaque::before {
+  content: ""; position: absolute; inset: auto -40% -60% -40%; height: 120%;
+  background: radial-gradient(closest-side, rgba(201, 135, 90, .16), transparent);
+  opacity: 0; transition: opacity .5s;
+}
+.plaque:hover::before { opacity: 1; }
+.plaque__k { font-family: var(--f-mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--copper); }
+.plaque__v { font-family: var(--f-display); font-size: clamp(26px, 2.6vw, 34px); line-height: 1.05; }
+.plaque__t { color: var(--muted); font-size: 14px; margin: 0; max-width: 32ch; }
+
+/* прайс-тизер */
+.price { padding-block: 0 clamp(80px, 12vh, 140px); display: grid; gap: 28px; }
+.price h2 { font-family: var(--f-display); font-weight: 400; margin: 0; font-size: clamp(28px, 3.6vw, 46px); }
+.classes { display: flex; flex-wrap: wrap; gap: 8px; }
+.classes button {
+  font: 500 14px/1 var(--f-body); color: var(--muted); background: transparent; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 99px; padding: 11px 16px; transition: color .25s, border-color .25s, background .25s;
+}
+.classes button[aria-pressed="true"] { color: #1a100a; background: var(--copper); border-color: var(--copper); }
+.rows { display: grid; border-top: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.row__n { font-size: clamp(15px, 1.4vw, 18px); }
+.row__n small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+.row__p { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: clamp(15px, 1.4vw, 18px); color: var(--copper-hi); white-space: nowrap; }
+
+.foot { border-top: 1px solid var(--line); padding-block: 36px 48px; color: var(--muted); font-size: 14px; }
+.foot .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: space-between; }
+.foot b { color: var(--paper); font-weight: 500; }
+
+/* «появление» — из видимого состояния, без исчезновения контента */
+.rise { transition: transform .9s cubic-bezier(.2,.8,.2,1), opacity .9s; }
+.rise.pre { transform: translateY(22px); opacity: 0; }
+
+/* вход текста первого экрана после сцены */
+.hero .eyebrow, .hero h1, .hero__lead, .hero__actions, .hero__meta { animation: up .9s cubic-bezier(.2,.8,.2,1) both; }
+.hero .eyebrow { animation-delay: var(--d0, 1.4s) } .hero h1 { animation-delay: calc(var(--d0, 1.4s) + .1s) }
+.hero__lead { animation-delay: calc(var(--d0, 1.4s) + .22s) } .hero__actions { animation-delay: calc(var(--d0, 1.4s) + .34s) }
+.hero__meta { animation-delay: calc(var(--d0, 1.4s) + .46s) }
+@keyframes up { from { opacity: 0; transform: translateY(16px) } }
+.mark-static { position: absolute; inset: 0; display: grid; place-items: center; padding-bottom: 26vh; }
+.mark-static img { width: min(600px, 84vw); }
+.no-gl { background: radial-gradient(60% 50% at 50% 40%, #3a2214, #0a0807 70%); }
+
+@media (max-width: 860px) {
+  .plaques__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .top nav { display: none; }
+}
+@media (max-width: 520px) {
+  .plaques__grid { grid-template-columns: minmax(0, 1fr); }
+  .plaque { min-height: 0; }
+  .btn { flex: 1 1 auto; }
+  .hero__actions { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise.pre { transform: none !important; opacity: 1 !important; }
+  .btn { transition: none; }
+  .hero .eyebrow, .hero h1, .hero__lead, .hero__actions, .hero__meta { animation: none; }
+}
+/* Медь + частицы: слои — жидкий металл, частицы, логотип в полном качестве */
+.hero__stage canvas { position: absolute; inset: 0; }
+.mark-pos { position: absolute; inset: 0; display: grid; place-items: center; padding-bottom: 30vh; pointer-events: none; }
+.mark-pos::before {
+  content: ""; position: absolute; left: 50%; top: 35%; width: min(900px, 120vw); height: 420px; translate: -50% -50%;
+  background: radial-gradient(closest-side, rgba(10, 8, 7, .78), transparent); z-index: -2;
+}
+.mark { position: relative; width: min(620px, 86vw); aspect-ratio: 662 / 240; }
+.mark__img, .mark__sheen { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mark__img {
+  opacity: 0; filter: blur(5px) brightness(1.4);
+  transition: opacity 1s ease, filter 1.2s ease;
+  -webkit-mask-image: radial-gradient(circle var(--mr, 0px) at var(--mx, -999px) var(--my, -999px), transparent 0, transparent 40%, #000 100%);
+          mask-image: radial-gradient(circle var(--mr, 0px) at var(--mx, -999px) var(--my, -999px), transparent 0, transparent 40%, #000 100%);
+}
+.mark.ready .mark__img { opacity: var(--fade, 1); filter: none; }
+.mark__sheen {
+  -webkit-mask: url("logo.webp") center / 100% 100% no-repeat;
+          mask: url("logo.webp") center / 100% 100% no-repeat;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 228, 196, .7) 50%, transparent 60%);
+  background-size: 260% 100%; background-position: 130% 0; mix-blend-mode: screen; opacity: 0;
+}
+.mark.ready .mark__sheen { animation: v4-sheen 8s ease-in-out 1.2s infinite; }
+@keyframes v4-sheen { 0% { opacity: 1; background-position: 130% 0 } 20% { background-position: -30% 0; opacity: 1 } 21%, 100% { opacity: 0; background-position: -30% 0 } }
+@media (max-width: 640px) { .mark-pos { padding-bottom: 40vh; } }
+@media (prefers-reduced-motion: reduce) {
+  .mark__img { transition: none; }
+  .mark__sheen { display: none; }
+}
