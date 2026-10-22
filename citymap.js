@@ -8,7 +8,7 @@
   var COL = {
     bg: '#0d0a08', bld: '#1c1510', bldEdge: 'rgba(201,135,90,.22)', bldHi: 'rgba(201,135,90,.55)',
     park: 'rgba(92,110,72,.18)', parkEdge: 'rgba(140,160,110,.25)', square: 'rgba(201,135,90,.07)', water: '#0f1418',
-    road: '#241d18', roadMain: '#30281f', foot: '#1a1512', label: 'rgba(239,233,226,.86)', wall: 'rgba(196,92,70,.55)',
+    road: '#2c241d', roadMain: '#3b3026', foot: '#1a1512', label: 'rgba(239,233,226,.86)', wall: 'rgba(196,92,70,.55)',
     route: '#f2c39a', car: '#c9875a'
   };
   var MAIN = { primary: 1, secondary: 1, tertiary: 1, trunk: 1 };
@@ -16,7 +16,7 @@
   var MINOR = { footway: 1, steps: 1, path: 1, service: 1 };
   var NAMED = { residential: 1, pedestrian: 1, living_street: 1, unclassified: 1 };
   // стены зданий: тон по стороне света (свет с северо-запада), 4 ступени
-  var WALL = ['#1d1611', '#261d16', '#30251c', '#3b2d22'], WALL_HI = ['#4a2d1a', '#5e3a22', '#73482a', '#8a5732'], WALL_LM = ['#2a2019', '#352920', '#413228', '#4e3c30'];
+  var WALL = ['#1d1611', '#261d16', '#30251c', '#3b2d22'], WALL_HI = ['#7d3f1c', '#9a5126', '#b8632f', '#d27a3c'], WALL_LM = ['#31261d', '#3d2f25', '#4a392d', '#584435'];
   var ROOF = '#211912', ROOF_HI = 'rgba(201,135,90,.42)', ROOF_LM = '#33271e';
   var LX = -0.6, LY = 0.8;
 
@@ -256,7 +256,7 @@
       for (var k = 1; k < n; k++) rf.lineTo(top[k][0], top[k][1]);
       rf.closePath();
       if (tgt) { if (++bn >= 50) flush(); return; }
-      ctx.fillStyle = hi[o.i] ? '#7a4a2c' : lm[o.i] ? ROOF_LM : ROOF; ctx.fill();
+      ctx.fillStyle = hi[o.i] ? '#e8925a' : lm[o.i] ? ROOF_LM : ROOF; ctx.fill();
       ctx.strokeStyle = hi[o.i] ? 'rgba(242,195,154,.9)' : lm[o.i] ? 'rgba(239,233,226,.32)' : 'rgba(201,135,90,.2)'; ctx.lineWidth = hi[o.i] ? 1.4 : 0.7; ctx.stroke();
     });
     flush();
@@ -348,9 +348,9 @@
         var big = m.tag === 'main', fs = m.size || (big ? 17 : 13);
         ctx.font = big ? '400 ' + fs + 'px "Tenor Sans", serif' : '500 ' + fs + 'px "Golos Text", sans-serif';
         var txt = big ? m.label.toUpperCase() : m.label, tw = ctx.measureText(txt).width + (big ? txt.length * 1.2 : 0), pw = tw + (big ? 30 : 20), ph = big ? 34 : 26;
-        var x = Math.max(8, Math.min(self.W - pw - 8, p[0] - pw / 2)), y = p[1] - ph - 10, cxl = x + pw / 2;
+        var x = Math.max(8, Math.min(self.W - pw - 8, p[0] - pw / 2 + (m.dx || 0))), y = p[1] - ph - 10 + (m.dy || 0), cxl = x + pw / 2;
         if (!big && (!self.flat && p[2] < z * 0.3 || onRoute(x - 4, y - 4, pw + 8, ph + 8) || !self.free(x - 4, y - 4, pw + 8, ph + 8))) { ctx.globalAlpha = 1; return; }
-        if (big && onRoute(x - 2, y - 2, pw + 4, ph + 4)) { a *= 0.28; ctx.globalAlpha = a; }
+        if (big && !m.solid && onRoute(x - 2, y - 2, pw + 4, ph + 4)) { a *= 0.28; ctx.globalAlpha = a; }
         if (big) self.free(x - 4, y - 18, pw + 8, ph + 22);
         if (m.h && g) { ctx.strokeStyle = big ? 'rgba(242,195,154,.8)' : 'rgba(239,233,226,.45)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(p[0], y + ph); ctx.stroke(); }
         ctx.fillStyle = big ? 'rgba(201,135,90,.94)' : 'rgba(18,14,11,.9)';

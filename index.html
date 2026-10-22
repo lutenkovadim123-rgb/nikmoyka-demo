@@ -1,120 +1,99 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0d0a08">
 <meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Автомойка на Никольской</title>
-<meta name="description" content="Ручная мойка, химчистка и детейлинг в 300 метрах от Кремля. Бесплатная парковка в Никольской Плазе на время мойки.">
-<link rel="preload" href="fonts/GolosText.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="base.css"><link rel="stylesheet" href="sections.css"><link rel="stylesheet" href="pages.css"><link rel="stylesheet" href="scenes.css">
+<title>Автомойка в Никольской Плазе — ручная мойка и детейлинг у Кремля</title>
+<meta name="description" content="Ручная мойка, химчистка, защита кузова и детейлинг в Никольской Плазе. Бесплатная парковка на время мойки. Запись онлайн.">
+<meta name="theme-color" content="#0a0807">
+<link rel="preload" href="fonts/GolosText.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/TenorSans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="site.css">
+<link rel="icon" href="logo.webp">
 </head>
-<body data-page="home">
-
+<body>
 <header class="top"><div class="wrap">
-  <a href="./" aria-label="Автомойка на Никольской — главная"><img class="top__logo" src="logo.webp" alt="Автомойка на Никольской" width="94" height="34"></a>
-  <nav aria-label="Разделы"><a href="park.html">Пока мы моем</a><a href="services.html">Услуги и цены</a><a href="detailing.html">Детейлинг</a><a href="route.html">Как добраться</a></nav>
-  <button class="top__mine" type="button" data-open="mine">Мои записи</button>
+  <a href="index.html" aria-label="Автомойка на Никольской — главная"><img class="top__logo" src="logo.webp" alt="Автомойка на Никольской" width="88" height="32"></a>
+  <nav aria-label="Разделы"><a href="services.html">Услуги</a><a href="park.html">Досуг</a><a href="route.html">Как добраться</a></nav>
   <button class="btn btn--copper top__cta" type="button" data-open="book">Записаться</button>
   <button class="top__menu" type="button" data-menu aria-expanded="false" aria-controls="menu"><i aria-hidden="true"></i>Меню</button>
 </div></header>
-<div class="menu" id="menu" aria-hidden="true" role="dialog" aria-label="Меню сайта">
-  <div class="wrap menu__bar"><img src="logo.webp" alt="Автомойка на Никольской" width="94" height="34"><button class="menu__close" type="button" data-menu-close aria-label="Закрыть меню">✕</button></div>
-  <div class="wrap menu__body">
-    <ul class="menu__list"><li class="menu__item" data-hint="Ручная мойка, химчистка и защита кузова в 300 метрах от Кремля."><a href="./" aria-current="page">Главная<small>Ручная мойка и детейлинг у Кремля</small></a></li><li class="menu__item" data-hint="Оставьте машину в паркинге Никольской Плазы и гуляйте: парковка бесплатна на всё время мойки."><a href="park.html">Пока мы моем<small>Парковка бесплатно</small></a></li><li class="menu__item" data-hint="Весь прайс по четырём классам автомобилей. Отметьте услуги — они соберутся в запись."><a href="services.html">Услуги и цены<small>Весь прайс</small></a></li><li class="menu__item menu__item--sub" data-hint="Трёхэтапная ручная мойка «НАНО» и отдельные работы."><a href="wash.html">Мойка<small>от 2 200 ₽</small></a></li><li class="menu__item menu__item--sub" data-hint="Пылесос, влажная уборка, уход за кожей, стёкла и коврики."><a href="interior.html">Уборка салона<small>от 400 ₽</small></a></li><li class="menu__item menu__item--sub" data-hint="Комплексная химчистка салона и по элементам. Почти целый день в центре."><a href="dry.html">Химчистка<small>от 500 ₽</small></a></li><li class="menu__item menu__item--sub" data-hint="Воск, полимер, полировка фар и деталей, полировка всей машины."><a href="protect.html">Защита кузова<small>от 400 ₽</small></a></li><li class="menu__item menu__item--sub" data-hint="Комплексы «От Никольской», керамика, полировка и оклейка плёнкой."><a href="detailing.html">Детейлинг и плёнка<small>от 5 800 ₽</small></a></li><li class="menu__item" data-hint="Заезд с Большого Черкасского переулка, выезд — на Лубянскую площадь."><a href="route.html">Как добраться и контакты<small>Никольская, 10</small></a></li></ul>
-    <div class="menu__side">
-      <span class="status" data-status>Ежедневно 09:00–21:00</span>
-      <p class="menu__preview" id="menuPreview">Пока мы моем, машина бесплатно стоит в паркинге Никольской Плазы.</p>
-      <div class="menu__contacts"><a href="tel:+74955320977">+7 495 532-09-77</a><a href="tel:+79250344442">+7 925 034-44-42</a><span style="color:var(--muted)">Москва, Никольская ул., 10</span></div>
-      <div class="row-btns"><button class="btn btn--copper" type="button" data-open="book">Записаться</button><button class="btn btn--ghost" type="button" data-open="mine">Мои записи</button></div>
-    </div>
-  </div>
-</div>
-<main id="top">
-<section class="hero" aria-label="Автомойка на Никольской">
-  <div class="hero__stage"></div>
-  <div class="mark-pos"><div class="mark" role="img" aria-label="Автомойка на Никольской"><img class="mark__img" src="logo@2x.webp" alt="" width="1324" height="480"><span class="mark__sheen"></span></div></div>
-  <div class="wrap hero__copy">
-    <span class="eyebrow">Никольская Плаза · 300 м от Кремля</span>
-    <h1>Бережный уход за&nbsp;вашим автомобилем</h1>
-    <p class="hero__lead">Ручная мойка, химчистка и защита кузова. Пока мы работаем, машина бесплатно стоит в подземном паркинге, а вы гуляете по центру.</p>
-    <div class="hero__actions"><button class="btn btn--copper btn--magnet" type="button" data-open="book">Записаться</button><button class="btn btn--ghost btn--magnet" type="button" data-open="quick">Быстрая запись</button></div>
-    <div class="hero__meta"><span class="status" data-status>Ежедневно 09:00–21:00</span><span><b>+7 495 532-09-77</b></span></div>
-  </div>
-</section>
-
-<section class="title" data-scene="title"><div class="scene__pin"><div class="title__glow"></div>
-  <div class="title__words title__out"><span class="title__a">Оставьте машину —</span><span class="title__b">центр Москвы ваш</span>
-  <p class="title__sub">Пока мы моем, <span class="hl" style="--n:7"><span class="w" style="--i:0">машина </span><span class="w" style="--i:1"><b class="free">бесплатно</b> </span><span class="w" style="--i:2">стоит </span><span class="w" style="--i:3">в&nbsp;подземном </span><span class="w" style="--i:4">паркинге </span><span class="w" style="--i:5">Никольской </span><span class="w" style="--i:6">Плазы</span></span></p>
-  <span class="title__cue">Листайте — покажем дорогу<i aria-hidden="true"></i></span></div>
-</div></section>
-
-<section class="story" data-scene="story"><div class="scene__pin story__pin">
-  <canvas aria-label="Карта: путь к мойке и пешие маршруты от неё"></canvas><div class="story__cards"></div>
-  <div class="story__cap" aria-live="polite"></div><div class="story__tl"></div>
-  <span class="story__credit">Карта: © участники <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></span>
-</div></section>
-
-<section class="offer"><div class="wrap">
-  <div class="offer__grid">
-    <div><span class="eyebrow rise">Пока мы моем</span><h2 class="rise">Оставьте машину — <em>центр Москвы ваш</em></h2></div>
-    <div class="rise"><p>Машина бесплатно стоит в подземном паркинге, а вы поднимаетесь в Никольскую Плазу: гастромаркет «Вокруг Света», бутики, салоны красоты, бары и фитнес — в том же здании. Красная площадь — в 300 метрах.</p>
-    <div class="row-btns" style="margin-top:22px"><a class="btn btn--copper btn--magnet" href="park.html#plaza">Чем заняться в Плазе</a><a class="btn btn--ghost" href="park.html#calc">Сколько у меня будет времени</a></div></div>
-  </div>
-  <div class="plz"><a class="plz__card rise plz__card--big" data-d="0" href="park.html#plaza"><img src="places/vokrug.webp" alt="" loading="lazy" decoding="async" width="800" height="600"><span class="plz__txt"><span class="plz__k">Еда</span><b>«Вокруг Света»</b><span>Огромная гастрозона: кухни разных стран</span></span></a><a class="plz__card rise" data-d="1" href="park.html#plaza"><img src="places/shop.webp" alt="" loading="lazy" decoding="async" width="800" height="600"><span class="plz__txt"><span class="plz__k">Шопинг</span><b>Бутики</b><span>Intimissimi, TOUS, Rado и другие</span></span></a><a class="plz__card rise" data-d="2" href="park.html#plaza"><img src="places/beauty.webp" alt="" loading="lazy" decoding="async" width="800" height="600"><span class="plz__txt"><span class="plz__k">Красота</span><b>Салоны</b><span>Гоар Аветисян, M.V.K. Beauty Line, барбершоп Jumanji</span></span></a><a class="plz__card rise plz__card--wide" data-d="3" href="park.html#plaza"><img src="places/fit.webp" alt="" loading="lazy" decoding="async" width="800" height="600"><span class="plz__txt"><span class="plz__k">Спорт</span><b>MOSFITNESS</b><span>Тренируйтесь — машина на бесплатном паркинге, мы её помоем</span></span></a></div>
-  <p class="plz__more rise">Ещё в Плазе: бары Papa's, The Dubliner, IL Патио · АВ Daily круглосуточно · аптека «36,6». <a href="park.html#credits">Фото</a></p>
-  <p class="plz__or rise">Или прогуляйтесь по центру — всё рядом</p>
-  <div class="scen"><a href="park.html#family" class="rise" data-d="0"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="6" r="2.5"/><circle cx="16" cy="8" r="2"/><path d="M4 21v-6a4 4 0 0 1 8 0v6M13 21v-4a3 3 0 0 1 6 0v4"/></svg><div><h3>Семьёй</h3><p>Обед во «Вокруг Света», ЦДМ, мороженое в ГУМе.</p></div><span class="go">Маршрут →</span></a><a href="park.html#shop" class="rise" data-d="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><div><h3>Шопинг</h3><p>Бутики Плазы, Третьяковский проезд, ГУМ.</p></div><span class="go">Маршрут →</span></a><a href="park.html#walk" class="rise" data-d="2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l5-14 3 8 3-5 5 11"/><circle cx="17" cy="5" r="1.5"/></svg><div><h3>Прогулка</h3><p>Красная площадь, Зарядье, Александровский сад.</p></div><span class="go">Маршрут →</span></a><a href="park.html#dinner" class="rise" data-d="3"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8a2 2 0 0 0 2 2v8M5 3v6M9 3v6M17 3c-2 2-2 6 0 8v10"/></svg><div><h3>Ужин или встреча</h3><p>Гастромаркет «Вокруг Света» или бар в Плазе.</p></div><span class="go">Маршрут →</span></a></div>
-</div></section>
-
-<section class="thesis"><div class="wrap">
-  <p>Мы относимся к кузову как к экспонату</p>
-  <small>Ручная работа · без конвейера · зал-витрина вместо подземного бокса</small>
-</div></section>
-
-<section class="pan" data-scene="pan"><div class="scene__pin">
-  <div class="wrap pan__head"><h2>Услуги</h2><div class="pan__prog" aria-hidden="true"><i></i></div><a href="services.html" style="color:var(--muted)">Весь прайс →</a></div>
-  <div class="pan__vp"><div class="pan__track"><a class="cat rise" data-d="0" href="wash.html"><div><h3>Мойка</h3><p>Трёхэтапная ручная мойка «НАНО» и отдельные работы.</p></div><div class="cat__foot"><span>≈ 1,5 ч</span><b>от 2 200 ₽</b></div></a><a class="cat rise" data-d="1" href="interior.html"><div><h3>Уборка салона</h3><p>Пылесос, влажная уборка, уход за кожей, стёкла.</p></div><div class="cat__foot"><span>≈ 1,5 ч</span><b>от 400 ₽</b></div></a><a class="cat rise" data-d="2" href="dry.html"><div><h3>Химчистка</h3><p>Комплексная и по элементам. −20% до 30 октября.</p></div><div class="cat__foot"><span>до 8 ч</span><b>от 500 ₽</b></div></a><a class="cat rise" data-d="0" href="protect.html"><div><h3>Защита кузова</h3><p>Воск, полимер, полировка фар и деталей.</p></div><div class="cat__foot"><span>≈ 2 ч</span><b>от 400 ₽</b></div></a><a class="cat rise cat--wide" data-d="1" href="detailing.html"><div><h3>Детейлинг и плёнка</h3><p>Комплексы «От Никольской», керамика, полировка, оклейка плёнкой. −15% на полную оклейку до 31 октября.</p></div><div class="cat__foot"><span>от 2,5 ч</span><b>от 5 800 ₽</b></div></a></div></div>
-</div></section>
-
-<section class="sec" id="promo"><div class="wrap">
-  <div class="sec__head rise"><h2>Акции октября</h2><p>Скидка применяется при приёмке автомобиля. В онлайн-записи показана обычная цена.</p></div>
+<div class="menu" id="menu" aria-hidden="true" role="dialog" aria-label="Меню"><div class="wrap" style="display:flex;flex-direction:column;flex:1">
+  <div class="menu__bar"><img src="logo.webp" alt="" width="88" height="32"><button class="x" type="button" data-menu-close aria-label="Закрыть меню">✕</button></div>
+  <ul class="menu__list"><li><a href="index.html" aria-current="page">Главная<small>Мойка в Никольской Плазе</small></a></li><li><a href="services.html">Услуги<small>Цены и запись</small></a></li><li><a href="park.html">Досуг<small>Пока мы моем</small></a></li><li><a href="route.html">Как добраться<small>и контакты</small></a></li></ul>
+  <div class="menu__side"><span class="status" data-status>Ежедневно 9:00–21:00</span>
+    <div class="menu__tel"><a href="tel:+74955320977">+7 495 532-09-77</a><a href="tel:+79250344442">+7 925 034-44-42</a></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn--copper" type="button" data-open="book">Записаться</button><button class="btn btn--ghost" type="button" data-open="mine">Мои записи</button></div></div>
+</div></div>
+<main id="main">
+<section class="hero"><div class="wrap">
+  <img class="hero__logo" src="logo@2x.webp" alt="Автомойка на Никольской" width="1324" height="480" fetchpriority="high">
+  <h1 class="hero__name">Автомойка в&nbsp;Никольской Плазе</h1>
+  <p class="hero__lead">Бережный уход за&nbsp;вашим автомобилем</p>
+  <p class="hero__sub">Бесплатная парковка во время мойки, химчистки и защиты кузова</p>
+  <div class="hero__actions"><button class="btn btn--copper" type="button" data-open="book">Записаться</button><button class="btn btn--ghost" type="button" data-open="quick">Быстрая запись</button></div>
+  <div class="hero__meta"><span class="status" data-status>Ежедневно 9:00–21:00</span><span>Ежедневно 9:00–21:00</span><i class="sep"></i><a href="tel:+74955320977">+7 495 532-09-77</a><i class="sep"></i><a href="tel:+79250344442">+7 925 034-44-42</a></div>
+</div></section><section class="promise"><div class="wrap promise__grid">
+  <div class="promise__item"><svg class="promise__ic" viewBox="0 0 44 44" aria-hidden="true"><rect x="7" y="7" width="30" height="30" rx="8"/><path d="M18 31V14h6a5 5 0 0 1 0 10h-6"/></svg><b>Бесплатный паркинг</b><span>Машина стоит в Никольской Плазе всё время работы</span></div>
+  <div class="promise__item"><svg class="promise__ic" viewBox="0 0 44 44" aria-hidden="true"><path d="M22 6s10 11 10 19a10 10 0 0 1-20 0c0-8 10-19 10-19z"/><path d="M17 26a5 5 0 0 0 5 5"/></svg><b>Чистая машина</b><span>Ручная мойка, химчистка, защита кузова и детейлинг</span></div>
+  <div class="promise__item"><svg class="promise__ic" viewBox="0 0 44 44" aria-hidden="true"><path d="M22 6l4.6 9.4L37 17l-7.5 7.3L31.3 35 22 30l-9.3 5 1.8-10.7L7 17l10.4-1.6z"/></svg><b>Интересный досуг</b><span>Гастромаркет, фитнес и бутики — в том же здании</span></div>
+</div></section><section class="sec" id="promo" data-until="2026-10-31T23:59:59+03:00"><div class="wrap">
+  <div class="sec__head"><h2>Акции октября</h2><p>До 31 октября включительно</p></div>
   <div class="promos">
-    <article class="promo" data-wipe><span class="promo__badge">−20%</span><h3>Химчистка салона</h3><p>Экономия до 10 000 ₽. В подарок озонация салона и удаление запахов.</p>
-      <div class="promo__foot"><span class="promo__left" data-until="2026-10-30">до 30 октября</span><button class="btn btn--copper" type="button" data-promo="dry-complex">Записаться</button></div></article>
-    <article class="promo" data-wipe><span class="promo__badge">−15%</span><h3>Полная оклейка полиуретановой плёнкой</h3><p>Экономия до 100 000 ₽. Плёнка TPU с защитным слоем TOP COAT.</p>
-      <div class="promo__foot"><span class="promo__left" data-until="2026-10-31">до 31 октября</span><button class="btn btn--copper" type="button" data-promo="ppf-full">Записаться</button></div></article>
-  </div>
-</div></section>
-
-<section class="sec" id="reviews"><div class="wrap">
-  <div class="sec__head rise"><div class="rating"><b>5,0</b><span>38 оценок и 34 отзыва<br>на <a href="https://yandex.ru/maps/org/avtomoyka_na_nikolskoy/173994843041/reviews/" target="_blank" rel="noopener">Яндекс Картах</a></span></div><p>Фрагменты отзывов клиентов с Яндекс Карт.</p></div>
-</div><div class="marquee" id="marquee"></div></section>
-
-<section class="sec"><div class="wrap">
-  <div class="idle rise"><div><b>Заезд — с Большого Черкасского переулка</b><span>Из переулка — во двор Плазы и вниз, в подземный паркинг. Выезд — на Лубянскую площадь.</span></div><a class="btn btn--ghost" href="route.html">Схема заезда</a></div>
+    <article class="promo"><span class="promo__until">до 31.10</span><span class="promo__pct">−20%</span><h3>Химчистка салона</h3><p>Полная химчистка и в подарок озонация — уберём посторонние запахи.</p><span class="promo__price">от 18 000 ₽<s>22 500 ₽</s></span><button class="btn btn--copper btn--sm" type="button" data-promo="dry-complex">Записаться со скидкой</button></article>
+    <article class="promo"><span class="promo__until">до 31.10</span><span class="promo__pct">−15%</span><h3>Полиуретановая плёнка</h3><p>Оклейка зон риска или всего кузова: защита от сколов, реагентов и солнца.</p><span class="promo__price">от 63 750 ₽<s>75 000 ₽</s></span><button class="btn btn--copper btn--sm" type="button" data-promo="ppf-zones">Записаться со скидкой</button></article>
+  </div></div></section><section class="sec" id="services"><div class="wrap">
+  <div class="sec__head"><h2>Услуги и цены</h2><p>Цены «от» — для седана. Точную назовём по классу автомобиля.</p></div>
+  <a class="all-btn" href="services.html">Все услуги<span>17 позиций и опции <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+  <div class="cats"><a class="cat" href="services.html#wash"><div><h3>Мойка</h3><p style="margin-top:8px">Ручная трёхэтапная мойка «НАНО», комплекс с салоном</p></div><div class="cat__foot"><b>от 2 200 ₽</b><span>≈ 1,5 ч</span></div></a><a class="cat" href="services.html#interior"><div><h3>Уборка салона</h3><p style="margin-top:8px">Пылесос, влажная уборка, стёкла, уход за кожей</p></div><div class="cat__foot"><b>от 400 ₽</b><span>≈ 1,5 ч</span></div></a><a class="cat" href="services.html#dry"><span class=cat__tag data-until=2026-10-31T23:59:59+03:00>−20%</span><div><h3>Химчистка</h3><p style="margin-top:8px">Комплексная или по элементам, озонация</p></div><div class="cat__foot"><b>от 500 ₽</b><span>до 8 ч</span></div></a><a class="cat" href="services.html#protect"><div><h3>Защита кузова</h3><p style="margin-top:8px">Воск, полировка фар и деталей, полировка кузова</p></div><div class="cat__foot"><b>от 400 ₽</b><span>от 2 ч</span></div></a><a class="cat" href="services.html#detailing"><span class=cat__tag data-until=2026-10-31T23:59:59+03:00>−15%</span><div><h3>Детейлинг и плёнка</h3><p style="margin-top:8px">Комплексы «От Никольской», керамика, полиуретановая плёнка</p></div><div class="cat__foot"><b>от 5 800 ₽</b><span>от 2,5 ч</span></div></a></div>
+</div></section><section class="sec" id="works"><div class="wrap">
+  <div class="sec__head"><div><h2>Наши работы</h2><p style="margin-top:8px">Реальные фото из нашего бокса и канала мойки. Нажмите, чтобы рассмотреть.</p></div>
+    <div class="works__nav"><button type="button" data-scroll="#worksList" data-dir="p" aria-label="Назад">‹</button><button type="button" data-scroll="#worksList" data-dir="n" aria-label="Вперёд">›</button></div></div>
+  <div class="works" id="worksList" data-gallery><button class="work" type="button" data-full="media/works/q3.webp" data-cap="Audi Q3" data-sub="Комплекс «НАНО» и антидождь на стёкла"><img src="media/works/q3-s.webp" alt="Audi Q3: Комплекс «НАНО» и антидождь на стёкла" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>Комплекс «НАНО» и антидождь на стёкла</small>Audi Q3</span></button><button class="work" type="button" data-full="media/works/a6foam.webp" data-cap="Audi A6" data-sub="Трёхэтапная мойка «НАНО»: пена"><img src="media/works/a6foam-s.webp" alt="Audi A6: Трёхэтапная мойка «НАНО»: пена" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>Трёхэтапная мойка «НАНО»: пена</small>Audi A6</span></button><button class="work" type="button" data-full="media/works/a6.webp" data-cap="Audi A6" data-sub="Комплекс «НАНО» — результат"><img src="media/works/a6-s.webp" alt="Audi A6: Комплекс «НАНО» — результат" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>Комплекс «НАНО» — результат</small>Audi A6</span></button><button class="work" type="button" data-full="media/works/gt3.webp" data-cap="Porsche 911 GT3" data-sub="В нашем боксе"><img src="media/works/gt3-s.webp" alt="Porsche 911 GT3: В нашем боксе" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>В нашем боксе</small>Porsche 911 GT3</span></button><figure class="work"><div class="pair"><button type="button" style="all:unset;cursor:zoom-in" data-full="media/works/pedals0.webp" data-cap="Педали и коврики · было" data-sub="Комплекс «НАНО»: было → стало"><img src="media/works/pedals0-s.webp" alt="Педали и коврики: было" loading="lazy" width="360" height="450"></button><button type="button" style="all:unset;cursor:zoom-in" data-full="media/works/pedals1.webp" data-cap="Педали и коврики · стало" data-sub="Комплекс «НАНО»: было → стало"><img src="media/works/pedals1-s.webp" alt="Педали и коврики: стало" loading="lazy" width="360" height="450"></button></div><figcaption class="work__cap"><small>Было · стало</small>Педали и коврики</figcaption></figure><button class="work" type="button" data-full="media/works/mazda.webp" data-cap="Mazda CX-5" data-sub="Комплекс мойки «НАНО»"><img src="media/works/mazda-s.webp" alt="Mazda CX-5: Комплекс мойки «НАНО»" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>Комплекс мойки «НАНО»</small>Mazda CX-5</span></button><button class="work" type="button" data-full="media/works/rangerover.webp" data-cap="Range Rover Sport" data-sub="В нашем боксе"><img src="media/works/rangerover-s.webp" alt="Range Rover Sport: В нашем боксе" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>В нашем боксе</small>Range Rover Sport</span></button><button class="work" type="button" data-full="media/works/mirror.webp" data-cap="Полировка зеркала" data-sub="Отражение без разводов"><img src="media/works/mirror-s.webp" alt="Полировка зеркала: Отражение без разводов" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>Отражение без разводов</small>Полировка зеркала</span></button><button class="work" type="button" data-full="media/works/suvfoam.webp" data-cap="Мойка кузова" data-sub="Активная пена — первый этап"><img src="media/works/suvfoam-s.webp" alt="Мойка кузова: Активная пена — первый этап" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>Активная пена — первый этап</small>Мойка кузова</span></button><button class="work" type="button" data-full="media/works/boxster.webp" data-cap="Porsche 718 Boxster" data-sub="В нашем боксе"><img src="media/works/boxster-s.webp" alt="Porsche 718 Boxster: В нашем боксе" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>В нашем боксе</small>Porsche 718 Boxster</span></button><button class="work" type="button" data-full="media/works/master.webp" data-cap="Работа мастера" data-sub="Ручная мойка"><img src="media/works/master-s.webp" alt="Работа мастера: Ручная мойка" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>Ручная мойка</small>Работа мастера</span></button><button class="work" type="button" data-full="media/works/bmw5.webp" data-cap="BMW 5 Series" data-sub="Готов к выдаче"><img src="media/works/bmw5-s.webp" alt="BMW 5 Series: Готов к выдаче" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>Готов к выдаче</small>BMW 5 Series</span></button><button class="work" type="button" data-full="media/works/black.webp" data-cap="Бизнес-седан" data-sub="Готов к выдаче"><img src="media/works/black-s.webp" alt="Бизнес-седан: Готов к выдаче" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>Готов к выдаче</small>Бизнес-седан</span></button><button class="work" type="button" data-full="media/works/box.webp" data-cap="Наш бокс" data-sub="Паркинг Никольской Плазы, −3 этаж"><img src="media/works/box-s.webp" alt="Наш бокс: Паркинг Никольской Плазы, −3 этаж" loading="lazy" decoding="async" width="360" height="450"><span class="work__cap"><small>Паркинг Никольской Плазы, −3 этаж</small>Наш бокс</span></button></div>
+  <div class="ba-wrap"><div><span class="k">До и после</span><h3 style="margin-top:8px">Химчистка пола и ковриков</h3><p>Сдвиньте перегородку: вправо — «до», влево — «после».</p><p>Фото — работа мастерской.</p></div>
+    <figure class="ba" data-ba style="--x:50%"><img class="ba__img" src="media/cabin-after.webp" alt="Салон после химчистки" width="720" height="1339" loading="lazy"><div class="ba__before"><img class="ba__img" src="media/cabin-before.webp" alt="Салон до химчистки" width="720" height="1339" loading="lazy"></div>
+      <span class="ba__tag ba__tag--l">До</span><span class="ba__tag ba__tag--r">После</span><span class="ba__line" aria-hidden="true"><i></i></span><input class="ba__range" type="range" min="0" max="100" value="50" aria-label="Перегородка: вправо — до, влево — после"></figure></div>
+</div></section><section class="sec" id="reviews"><div class="wrap">
+  <div class="sec__head"><div class="rating"><b>5,0</b><div><span class="stars" aria-label="5 из 5">★★★★★</span><br><span>38 оценок на Яндекс Картах</span></div></div>
+    <a class="btn btn--ghost btn--sm" href="https://yandex.ru/maps/org/avtomoyka_na_nikolskoy/173994843041/reviews/" target="_blank" rel="noopener">Все отзывы на Яндекс Картах</a></div>
+  <div class="reviews"><blockquote class="review"><p>«Мойка, где всё на своём месте: процесс выстроен, результат предсказуем, а ожидание — не потерянное время.»</p><cite><span class="stars" aria-hidden="true">★★★★★</span><br>Александр С. · Яндекс Карты</cite></blockquote><blockquote class="review"><p>«Машину сделали как новую, кузов сияет, салон чистый, всё аккуратно.»</p><cite><span class="stars" aria-hidden="true">★★★★★</span><br>Елена Жихарева · Яндекс Карты</cite></blockquote><blockquote class="review"><p>«Парковка бесплатная, водичку в салон кладут, цена доступная.»</p><cite><span class="stars" aria-hidden="true">★★★★★</span><br>Artyom Balyan · Яндекс Карты</cite></blockquote><blockquote class="review"><p>«…рассказал, какие участки требуют особого внимания — например, битумные пятна на арках.»</p><cite><span class="stars" aria-hidden="true">★★★★★</span><br>Андрей · Яндекс Карты</cite></blockquote><blockquote class="review"><p>«Со стройки вылили цемент на припаркованный автомобиль, думал машине хана, но нет.»</p><cite><span class="stars" aria-hidden="true">★★★★★</span><br>Никита Г. · Яндекс Карты</cite></blockquote><blockquote class="review"><p>«…полировка и нанесение защитных составов – всё это сделало мой автомобиль не только чистым, но и защищённым.»</p><cite><span class="stars" aria-hidden="true">★★★★★</span><br>Алена Новикова · Яндекс Карты</cite></blockquote><blockquote class="review"><p>«…за это время мы с семьей успели погулять по Красной площади.»</p><cite><span class="stars" aria-hidden="true">★★★★★</span><br>Сергей Ф. · Яндекс Карты</cite></blockquote><blockquote class="review"><p>«Персонал — настоящие профессионалы, рассказали этапы мойки.»</p><cite><span class="stars" aria-hidden="true">★★★★★</span><br>artiom20.09 · Яндекс Карты</cite></blockquote></div>
+  <p class="note" style="margin-top:12px">Фрагменты отзывов с Яндекс Карт, без правок.</p>
+</div></section><section class="sec"><div class="wrap teaser">
+  <div class="teaser__main"><span class="k">Пока мы моем</span><h2>Досуг в Никольской Плазе</h2><p>Поднимитесь из паркинга: гастромаркет «Вокруг Света», фитнес, салоны и бутики — в том же здании. Подскажем, что успеть за время мойки.</p><a class="btn btn--ghost" href="park.html">Чем заняться</a></div>
+  <div class="teaser__tiles">
+    <a class="tile" href="park.html#eat"><img src="places/vokrug.webp" alt="" loading="lazy" width="400" height="300"><span><small>Еда · 1 этаж</small>«Вокруг Света»</span></a>
+    <a class="tile" href="park.html#fit"><img src="places/fit.webp" alt="" loading="lazy" width="400" height="300"><span><small>Спорт · −1 этаж</small>MOSFITNESS</span></a>
+    <a class="tile" href="park.html#beauty"><img src="places/beauty.webp" alt="" loading="lazy" width="400" height="300"><span><small>Красота · 2 этаж</small>Салоны</span></a>
+    <a class="tile" href="park.html#drink"><img src="places/bar.webp" alt="" loading="lazy" width="400" height="300"><span><small>Выпить</small>Бары и паб</span></a>
+  </div></div></section><section class="sec" id="route"><div class="wrap">
+  <div class="sec__head"><div><h2>Как заехать</h2><p style="margin-top:8px">Заезд с Большого Черкасского переулка, выезд — на Лубянскую площадь.</p></div><a class="btn btn--ghost btn--sm" href="route.html">Контакты и схема</a></div>
+  <div class="mapbox" data-routemap data-from="lubyanka"><canvas class="map" aria-label="3D-карта: маршрут к въезду в паркинг Никольской Плазы"></canvas><canvas class="car" aria-hidden="true"></canvas>
+    <div class="mapbox__load">Загружаем карту…</div>
+    <div class="mapbox__legend" aria-hidden="true"><span><i></i>Маршрут на машине</span><span><i class="pl"></i>Никольская Плаза</span></div>
+    <span class="mapbox__credit">Карта: © участники <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></span></div>
+  <div class="howto"><ol class="steps-list">
+    <li><div><b>Лубянская площадь → Новая площадь</b><span>Никольская улица пешеходная — заезда с неё нет</span></div></li>
+    <li><div><b>По Ильинке — в Большой Черкасский переулок</b><span>Переулок односторонний, едем по нему к Плазе</span></div></li>
+    <li><div><b>Поворот во двор Плазы</b><span>Въезд под вывеской «Паркинг | Автомойка»</span></div></li>
+    <li><div><b>Спуск на −3 этаж</b><span>Мойка — на территории паркинга. Парковка на время мойки бесплатная. Выезд — на Лубянскую площадь</span></div></li>
+  </ol>
+  <div class="navi"><div class="addr">Москва, Никольская ул., 10<small>Никольская Плаза · паркинг −3 этаж · въезд с Большого Черкасского переулка</small></div>
+    <div class="navi__btns"><a class="btn btn--copper" href="https://yandex.ru/maps/?rtext=~55.757898%2C37.625083&rtt=auto" target="_blank" rel="noopener">Яндекс Карты</a><a class="btn btn--ghost" href="yandexnavi://build_route_on_map?lat_to=55.757898&lon_to=37.625083">Навигатор</a><a class="btn btn--ghost" href="https://2gis.ru/moscow/directions/points/%7C37.625083%2C55.757898" target="_blank" rel="noopener">2ГИС</a></div>
+    <figure class="entrance" style="margin:0"><img src="media/works/entrance.webp" alt="Въезд в паркинг Никольской Плазы с вывеской «Паркинг | Автомойка»" loading="lazy" width="800" height="760"><span>Так выглядит въезд</span></figure></div></div>
 </div></section>
 </main>
-<footer class="foot" style="margin-top: clamp(72px, 11vh, 128px)"><div class="wrap">
-  <span><b>Автомойка на Никольской</b><br>Москва, Никольская ул., 10 · ежедневно 09:00–21:00</span>
-  <span><a href="park.html">Пока мы моем</a> · <a href="services.html">Услуги</a> · <a href="route.html">Как добраться</a> · <a href="route.html#privacy">Политика данных</a></span>
-  <span>Цены «от», не являются публичной офертой · © 2026</span>
+<footer class="foot"><div class="wrap">
+  <div><b>Автомойка на Никольской</b><br>Москва, Никольская ул., 10, Никольская Плаза<br>паркинг −3 этаж · ежедневно 9:00–21:00<br><a href="tel:+74955320977">+7 495 532-09-77</a> · <a href="tel:+79250344442">+7 925 034-44-42</a></div>
+  <nav><a href="index.html">Главная</a><a href="services.html">Услуги</a><a href="park.html">Досуг</a><a href="route.html">Как добраться</a></nav>
+  <div><a href="route.html#privacy">Политика обработки данных</a><br>Цены «от», не являются публичной офертой<br><a href="park.html#credits">Фото и карта: источники</a><br>© 2026</div>
 </div></footer>
-<div class="dock" id="dock" aria-live="polite"><div class="dock__in">
-  <div class="dock__sum" id="dockSum"></div>
-  <button class="btn btn--copper" type="button" data-open="book">Выбрать время</button>
-</div></div>
-<div class="sheet" id="sheet" aria-hidden="true">
-  <div class="sheet__bg" data-close></div>
+<nav class="tabbar" aria-label="Быстрые разделы"><a class="tab" href="index.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Главная</span></a><a class="tab" href="services.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span>Услуги</span></a><button class="tab tab--book" type="button" data-open="book"><span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M12 13v5M9.5 15.5h5"/></svg></span><em>Запись</em><span class="badge" data-cartcount hidden>0</span></button><a class="tab" href="park.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11h12v3a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5zM17 12h1.5a2.5 2.5 0 0 1 0 5H16M8 3c0 2 2 2 2 4M12 3c0 2 2 2 2 4"/></svg><span>Досуг</span></a><a class="tab" href="route.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span>Контакты</span></a></nav>
+<div class="sheet" id="sheet" aria-hidden="true"><div class="sheet__bg" data-close></div>
   <div class="sheet__panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-    <div><div class="sheet__head"><h2 id="sheetTitle">Запись</h2><button class="x" type="button" data-close aria-label="Закрыть">✕</button></div><div class="steps" id="steps"></div></div>
-    <div class="sheet__body" id="sheetBody"></div>
-    <div class="sheet__foot" id="sheetFoot"></div>
-  </div>
-</div>
-<nav class="tabbar" aria-label="Быстрые разделы"><a class="tab" href="./" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Главная</span></a><a class="tab" href="services.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span>Услуги</span></a><button class="tab tab--book" type="button" data-open="book"><span class="pill"><svg viewBox="0 0 24 24" aria-hidden="true" style="stroke:#1a100a"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M12 13v5M9.5 15.5h5"/></svg></span><em>Запись</em><span class="badge" data-cartcount hidden>0</span></button><a class="tab" href="route.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span>Маршрут</span></a><button class="tab" type="button" data-menu aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>Меню</span></button></nav>
-<script src="vendor/lenis.min.js"></script><script src="data.js"></script><script src="city.js"></script><script src="core.js"></script><script src="scenes.js"></script><script src="liquid.js"></script>
-<script src="mapdata.js"></script><script src="places.js"></script><script src="citymap.js"></script><script src="story.js"></script><script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script><script type="module" src="hero.js"></script>
+    <div><div class="sheet__head"><button class="sheet__back" type="button" aria-label="Назад" hidden>←</button><h2 id="sheetTitle">Запись</h2><button class="x" type="button" data-close aria-label="Закрыть">✕</button></div><div class="steps" id="steps"></div></div>
+    <div class="sheet__body" id="sheetBody"></div><div class="sheet__foot" id="sheetFoot"></div>
+  </div></div>
+<script src="data.js"></script><script src="venues.js"></script><script src="app.js"></script><script src="ba.js" defer></script><script src="routemap.js" defer></script>
 </body>
 </html>
