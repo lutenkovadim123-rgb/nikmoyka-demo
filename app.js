@@ -323,7 +323,8 @@
     body.innerHTML = '<span class="okmark"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><div><h3>Вы записаны</h3><p class="note" style="margin-top:6px">Код записи <b style="color:var(--copper-hi)">' + r.code + '</b> · администратор подтвердит по телефону</p></div>' +
       '<div class="summary"><div><span>Заезд</span><b>' + dayLabel(r.day) + ', ' + r.time + '</b></div>' + r.items.map(function (n) { return '<div><span>' + esc(n) + '</span></div>'; }).join('') + '<div><span>Итого</span><b>от ' + rub(r.total) + '</b></div></div>' +
       '<div class="ready"><span>Мойка займёт ≈ ' + hrs(r.h) + '</span><b>' + (r.end ? 'Машина будет готова примерно к ' + r.end : 'Машина останется в паркинге до завтра') + '</b><span>Парковка бесплатна · Никольская, 10, паркинг −3 этаж · въезд с Большого Черкасского</span></div>' +
-      leisure(r.h) + '<p class="demo">Это демонстрация: запись сохранена только в этом браузере и никуда не отправлена.</p>';
+      '<div class="remind"><button class="btn btn--ghost btn--sm" type="button" data-ics="' + r.id + '">Добавить в календарь</button><a class="tg" href="https://t.me/carwash_na_nikolskoy" target="_blank" rel="noopener">Написать в Telegram</a></div>' +
+      leisure(r.h) + '<p class="demo">Это демонстрация: запись сохранена только в этом браузере и никуда не отправлена. В рабочей версии напомним СМС или в Telegram за день до визита.</p>';
     foot.innerHTML = '<a class="btn btn--ghost" href="park.html#plan">Весь досуг</a><button class="btn btn--copper" type="button" data-close>Готово</button>';
   }
   function stQuick() {
@@ -347,8 +348,8 @@
     var all = store.get('nik:bookings', []).filter(function (r) { return new Date(r.day + 'T' + r.time) > new Date(Date.now() - 3 * 3600e3); });
     body.innerHTML = all.length ? '<div class="mine">' + all.map(function (r) {
       return '<div class="mine__item"><b>' + dayLabel(r.day) + ', ' + r.time + '</b><span>' + esc(r.items.join(', ')) + '</span><span>Код ' + r.code + ' · от ' + rub(r.total) + ' · ≈ ' + hrs(r.h) + '</span>' +
-        '<button class="btn btn--ghost btn--sm" type="button" data-cancel="' + r.id + '">Отменить</button></div>';
-    }).join('') + '</div>' : '<p class="note">На этом устройстве записей нет.</p>';
+        '<div class="remind"><button class="btn btn--copper btn--sm" type="button" data-ics="' + r.id + '">Напомнить: в календарь</button><button class="btn btn--ghost btn--sm" type="button" data-cancel="' + r.id + '">Отменить</button></div></div>';
+    }).join('') + '</div><p class="note">Календарь телефона напомнит за день и за 2 часа до визита. В рабочей версии — ещё и СМС или сообщение в Telegram, а найти записи можно будет по телефону с любого устройства.</p>' : '<p class="note">На этом устройстве записей нет.</p>';
     foot.innerHTML = '<button class="btn btn--copper" type="button" data-open="book">Новая запись</button>';
     $$('[data-cancel]', body).forEach(function (b) {
       b.onclick = function () {
@@ -356,6 +357,52 @@
         store.set('nik:bookings', store.get('nik:bookings', []).filter(function (r) { return String(r.id) !== b.dataset.cancel; })); render(); document.dispatchEvent(new CustomEvent('nik:booked'));
       };
     });
+  }
+
+  /* ---------- напоминание о визите ---------- */
+  // Файл .ics: телефон сам напомнит за день и за 2 часа. СМС и Telegram — из рабочей версии с сервером.
+  function ics(rec) {
+    var d = rec.day.replace(/-/g, ''), t = rec.time.replace(':', '') + '00', e = (rec.end || '21:00').replace(':', '') + '00';
+    var txt = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//nikmoyka//demo//RU', 'BEGIN:VEVENT', 'UID:' + rec.id + '@nikmoyka', 'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z',
+      'DTSTART;TZID=Europe/Moscow:' + d + 'T' + t, 'DTEND;TZID=Europe/Moscow:' + d + 'T' + e, 'SUMMARY:Мойка на Никольской: ' + (rec.items[0] || 'запись'),
+      'LOCATION:Москва\\, Никольская ул.\\, 10\\, паркинг −3 этаж (въезд с Большого Черкасского пер.)', 'DESCRIPTION:Код записи ' + rec.code + '. Телефон +7 495 532-09-77',
+      'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Завтра мойка на Никольской', 'TRIGGER:-P1D', 'END:VALARM',
+      'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Через 2 часа мойка на Никольской', 'TRIGGER:-PT2H', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/calendar' })); a.download = 'nikmoyka-' + rec.day + '.ics';
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function upcoming() {
+    var now = Date.now();
+    return store.get('nik:bookings', []).filter(function (r) { return new Date(r.day + 'T' + (r.end || r.time) + ':00').getTime() > now; })
+      .sort(function (a, b) { return (a.day + a.time) < (b.day + b.time) ? -1 : 1; });
+  }
+  NIK.upcoming = upcoming;
+  function visit() {
+    var old = $('.visit'); if (old) old.remove();
+    var r = upcoming()[0]; if (!r || store.get('nik:visitHidden', 0) === r.id || $('[data-admin]')) return;
+    var el = document.createElement('div'); el.className = 'visit'; el.setAttribute('role', 'status');
+    var soon = new Date(r.day + 'T' + r.time + ':00') - Date.now() < 36 * 3600e3;
+    el.innerHTML = '<span><b>' + (soon ? 'Скоро ваша запись' : 'Ваша запись') + ' · ' + dayLabel(r.day) + ', ' + r.time + '</b><small>' + esc(r.items[0] || 'Мойка') + ' · ≈ ' + hrs(r.h) + ' · код ' + r.code + '</small></span>' +
+      '<button class="btn btn--ghost btn--sm" type="button" data-open="mine">Мои записи</button><button class="x" type="button" aria-label="Скрыть напоминание">✕</button>';
+    $('.x', el).onclick = function () { store.set('nik:visitHidden', r.id); el.remove(); };
+    document.body.appendChild(el);
+  }
+  document.addEventListener('nik:booked', visit);
+  document.addEventListener('click', function (e) { var c = e.target.closest('[data-ics]'); if (c) { var r = store.get('nik:bookings', []).filter(function (x) { return String(x.id) === c.dataset.ics; })[0]; if (r) ics(r); } });
+
+  /* ---------- видео работ: грузятся и играют, только когда видны ---------- */
+  var vids = $$('.work--video video'), still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (vids.length && 'IntersectionObserver' in window) {
+    var vio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) {
+          if (!v.dataset.ok) { $$('source', v).forEach(function (s) { s.src = s.dataset.src; }); v.load(); v.dataset.ok = 1; }
+          if (!still) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+        } else v.pause();
+      });
+    }, { threshold: 0.4 });
+    vids.forEach(function (v) { vio.observe(v); v.closest('.work').addEventListener('click', function () { if (!v.dataset.ok) { $$('source', v).forEach(function (s) { s.src = s.dataset.src; }); v.load(); v.dataset.ok = 1; } if (v.paused) v.play(); else v.pause(); }); });
   }
 
   /* ---------- просмотр работ ---------- */
@@ -389,7 +436,7 @@
     b.addEventListener('click', function () { var t = $(b.dataset.scroll); t.scrollBy({ left: (b.dataset.dir === 'p' ? -1 : 1) * t.clientWidth * 0.9, behavior: 'smooth' }); });
   });
 
-  refresh();
+  refresh(); visit();
   // переход по якорю после отрисовки каталога и шрифтов: страница встаёт ровно на нужный раздел
   function goHash() { var h = decodeURIComponent(location.hash.slice(1)); var el = h && document.getElementById(h); if (el) el.scrollIntoView(); }
   NIK.goHash = goHash;
