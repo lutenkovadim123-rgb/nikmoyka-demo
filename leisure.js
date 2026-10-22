@@ -19,5 +19,6 @@
     [].forEach.call(box.querySelectorAll('[data-h]'), function (b) { b.onclick = function () { pick = +b.dataset.h; render(); }; });
   }
   render();
+  if (location.hash && NIK.goHash) NIK.goHash();
   document.addEventListener('nik:booked', render);
 })();

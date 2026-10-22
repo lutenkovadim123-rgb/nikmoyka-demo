@@ -390,4 +390,8 @@
   });
 
   refresh();
+  // переход по якорю после отрисовки каталога и шрифтов: страница встаёт ровно на нужный раздел
+  function goHash() { var h = decodeURIComponent(location.hash.slice(1)); var el = h && document.getElementById(h); if (el) el.scrollIntoView(); }
+  NIK.goHash = goHash;
+  if (location.hash) { goHash(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(goHash); window.addEventListener('load', function () { setTimeout(goHash, 0); }); }
 })();
