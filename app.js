@@ -70,7 +70,25 @@
     return Math.max(1, Math.round(h * 2) / 2);
   }
   NIK.cart = { lines: lines, total: total, hours: hours, has: function (k) { return cart.has(k); } };
-  function toggle(k) { if (cart.has(k)) cart.delete(k); else cart.set(k, 1); save(); refresh(); }
+  function toggle(k) { var on = !cart.has(k); if (on) cart.set(k, 1); else cart.delete(k); save(); refresh(); feel(on); }
+  // тихий отклик на отметку услуги: вибрация (Android), системный «тик» переключателя (iOS 18+), едва слышный щелчок
+  var hapt = null, actx = null;
+  function feel(on) {
+    try { if (navigator.vibrate) navigator.vibrate(on ? 8 : 4); } catch (e) {}
+    try {
+      if (!navigator.vibrate && /iphone|ipad/i.test(navigator.userAgent)) {
+        if (!hapt) { hapt = document.createElement('label'); hapt.setAttribute('aria-hidden', 'true'); hapt.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-9px'; hapt.innerHTML = '<input type="checkbox" switch tabindex="-1">'; document.body.appendChild(hapt); }
+        hapt.click();
+      }
+    } catch (e) {}
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      actx = actx || new AC(); if (actx.state === 'suspended') actx.resume();
+      var t = actx.currentTime, o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(on ? 1320 : 880, t); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.03, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+      o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + 0.06);
+    } catch (e) {}
+  }
   function setClass(i) { cls = i; store.set('nik:cls', i); refresh(); }
   NIK.setClass = setClass;
 
@@ -412,18 +430,32 @@
   document.addEventListener('click', function (e) { var c = e.target.closest('[data-ics]'); if (c) { var r = store.get('nik:bookings', []).filter(function (x) { return String(x.id) === c.dataset.ics; })[0]; if (r) ics(r); } });
 
   /* ---------- видео работ: грузятся и играют, только когда видны ---------- */
-  var vids = $$('.work--video video'), still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // подписи этапов поверх видео въезда
+  function chapters(v) {
+    var cap = v.parentNode.querySelector('.entrance__cap'); if (!cap || !v.dataset.chapters) return;
+    var ch = v.dataset.chapters.split('|').map(function (x) { var i = x.indexOf(':'); return [+x.slice(0, i), x.slice(i + 1)]; }), cur = '';
+    v.addEventListener('timeupdate', function () { var t = v.currentTime, n = ch[0][1]; ch.forEach(function (c) { if (t >= c[0]) n = c[1]; }); if (n !== cur) { cur = n; cap.textContent = n; } });
+  }
+  // «Сегодня свободно с …» под кнопкой записи (демо-расписание; в рабочей версии — свободные окна Core12)
+  (function () {
+    var el = $('[data-free]'); if (!el) return;
+    var d = new Date(), today = ymd(d), t = slots(today).filter(function (x) { return !x.off; })[0], lbl = 'Сегодня';
+    if (!t) { d.setDate(d.getDate() + 1); t = slots(ymd(d)).filter(function (x) { return !x.off; })[0]; lbl = 'Завтра'; }
+    if (!t) return;
+    el.innerHTML = '<button type="button" data-open="book"><i></i>' + lbl + ' свободно с ' + t.t + '</button>'; 
+  })();
+  var vids = $$('.work--video video, .entrance video'), still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (vids.length && 'IntersectionObserver' in window) {
     var vio = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         var v = e.target;
         if (e.isIntersecting) {
           if (!v.dataset.ok) { $$('source', v).forEach(function (s) { s.src = s.dataset.src; }); v.load(); v.dataset.ok = 1; }
-          if (!still) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+          if (!still || v.closest('.entrance')) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
         } else v.pause();
       });
     }, { threshold: 0.4 });
-    vids.forEach(function (v) { vio.observe(v); v.closest('.work').addEventListener('click', function () { if (!v.dataset.ok) { $$('source', v).forEach(function (s) { s.src = s.dataset.src; }); v.load(); v.dataset.ok = 1; } if (v.paused) v.play(); else v.pause(); }); });
+    vids.forEach(function (v) { vio.observe(v); chapters(v); v.closest('.work, .entrance').addEventListener('click', function () { if (!v.dataset.ok) { $$('source', v).forEach(function (s) { s.src = s.dataset.src; }); v.load(); v.dataset.ok = 1; } if (v.paused) v.play(); else v.pause(); }); });
   }
 
   /* ---------- просмотр работ ---------- */
