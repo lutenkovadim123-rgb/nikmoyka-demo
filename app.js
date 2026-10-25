@@ -93,9 +93,9 @@
     if (s.items) {
       var n = s.items.filter(function (it) { return !pkgNames[it.name]; }).length;
       var picked = s.items.some(function (_, i) { return cart.has(s.id + ':' + i); });
-      return '<div class="opts"><button class="svc" type="button" data-opts="' + s.id + '" aria-expanded="false" aria-pressed="' + picked + '">' + icon(s.cat) +
-        '<span class="svc__n"><b>' + esc(s.name) + '</b><span>Отметьте нужное · ' + n + ' ' + plural(n, 'позиция', 'позиции', 'позиций') + '</span></span>' + priceHtml(s) + '</button>' +
-        '<div class="opts__list" hidden>' + s.items.map(function (it, i) {
+      return '<div class="opts' + (picked ? ' opts--on' : '') + '"><div class="svc svc--head">' + icon(s.cat) +
+        '<span class="svc__n"><b>' + esc(s.name) + '</b><span>Отметьте нужное · ' + n + ' ' + plural(n, 'позиция', 'позиции', 'позиций') + '</span></span>' + priceHtml(s) + '</div>' +
+        '<div class="opts__list">' + s.items.map(function (it, i) {
           if (pkgNames[it.name]) return '';
           var k = s.id + ':' + i;
           return '<button class="opt" type="button" data-key="' + k + '" aria-pressed="' + cart.has(k) + '"><span>' + esc(it.name) + '</span><b>от ' + rub(it.p[C()]) + '</b><i></i></button>';
@@ -105,10 +105,14 @@
     return '<button class="svc" type="button" data-key="' + s.id + '" aria-pressed="' + cart.has(s.id) + '">' + icon(s.cat) +
       '<span class="svc__n"><b>' + esc(s.name) + '</b><span>' + esc(s.note) + '</span>' + (off ? '<em class="tag">−' + off + '% до 31 октября</em>' : '') + '</span>' + priceHtml(s) + '</button>';
   }
-  function list(cat) { return D.services.filter(function (s) { return cat === 'all' || s.cat === cat; }).map(row).join(''); }
-  // раскрытые группы опций переживают перерисовку
-  var openOpts = {};
-  function restoreOpts(root) { $$('[data-opts]', root).forEach(function (b) { if (openOpts[b.dataset.opts]) { b.setAttribute('aria-expanded', 'true'); b.nextElementSibling.hidden = false; } }); }
+  function inCat(cat) { return function (s) { return cat === 'all' || s.cat === cat; }; }
+  function list(cat) { return D.services.filter(inCat(cat)).map(row).join(''); }
+  // «Все услуги» на странице услуг — весь перечень с подзаголовками категорий
+  function listGrouped(cat) {
+    if (cat !== 'all') return list(cat);
+    return Object.keys(D.cats).map(function (k) { return '<p class="svcs__h">' + esc(D.cats[k]) + '</p>' + list(k); }).join('');
+  }
+  function picked(s) { return s.items ? s.items.some(function (_, i) { return cart.has(s.id + ':' + i); }) : cart.has(s.id); }
 
   /* ---------- выбор класса и поиск модели ---------- */
   var BRAND = { 'мерседес': 'mercedes', 'мерс': 'mercedes', 'бмв': 'bmw', 'ауди': 'audi', 'тойота': 'toyota', 'лексус': 'lexus', 'киа': 'kia', 'хендай': 'hyundai', 'хундай': 'hyundai', 'хёндай': 'hyundai', 'порше': 'porsche', 'порш': 'porsche', 'рендж': 'range rover', 'рейндж': 'range rover', 'ленд': 'land rover', 'лэнд': 'land rover', 'фольксваген': 'volkswagen', 'шкода': 'skoda', 'мазда': 'mazda', 'ниссан': 'nissan', 'вольво': 'volvo', 'тесла': 'tesla', 'мини': 'mini', 'хавал': 'haval', 'хавейл': 'haval', 'чери': 'chery', 'джили': 'geely', 'генезис': 'genesis', 'инфинити': 'infiniti', 'кадиллак': 'cadillac', 'бентли': 'bentley', 'ламборгини': 'lamborghini', 'феррари': 'ferrari', 'майбах': 'maybach', 'гелик': 'g-class', 'гелендваген': 'g-class', 'крузак': 'land cruiser', 'камри': 'camry', 'солярис': 'solaris', 'рио': 'rio', 'поло': 'polo', 'зикр': 'zeekr', 'лисян': 'li auto', 'танк': 'tank', 'роллс': 'rolls-royce', 'ягуар': 'jaguar', 'мазерати': 'maserati', 'чанган': 'changan', 'эксид': 'exeed', 'омода': 'omoda' };
@@ -161,11 +165,24 @@
   }
 
   /* ---------- страница «Услуги» ---------- */
-  var page = $('[data-catalog-page]');
+  var page = $('[data-catalog-page]'), pcat = 'all';
+  // services.html#wash — сразу открыта нужная категория
+  function hashCat() { var h = location.hash.slice(1); return D.cats[h] ? h : null; }
+  if (page && hashCat()) pcat = hashCat();
+  if (page) {
+    page.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-pcat]'); if (!b) return;
+      pcat = b.dataset.pcat; renderPage();
+      try { history.replaceState(null, '', pcat === 'all' ? location.pathname : '#' + pcat); } catch (x) {}
+      var top = $('#catalogTop'); if (top && top.getBoundingClientRect().top < 0) top.scrollIntoView();
+    });
+    window.addEventListener('hashchange', function () { if (hashCat()) { pcat = hashCat(); renderPage(); } });
+  }
   function renderPage() {
     if (!page) return;
     var cb = $('#classCards'); if (cb) cb.innerHTML = classCards(true);
-    $$('[data-catalog]', page).forEach(function (box) { box.innerHTML = list(box.dataset.catalog); restoreOpts(box); });
+    var box = $('#catalog'); if (box) box.innerHTML = listGrouped(pcat);
+    $$('[data-pcat]', page).forEach(function (b) { var on = b.dataset.pcat === pcat; b.setAttribute('aria-pressed', String(on)); if (on && b.parentNode.scrollWidth > b.parentNode.clientWidth) b.parentNode.scrollLeft = b.offsetLeft - 16; });
     var lab = $('#classLabel'); if (lab) lab.textContent = cls == null ? 'Цены для седана. Выберите класс, чтобы увидеть свои.' : 'Цены «от» для класса: ' + D.classes[cls][1] + '.';
   }
   if (page) {
@@ -181,8 +198,6 @@
   function refresh() { renderPage(); renderBar(); badges(); if (sheetOpen) render(); }
 
   document.addEventListener('click', function (e) {
-    var o = e.target.closest('[data-opts]');
-    if (o) { var on = o.getAttribute('aria-expanded') !== 'true'; o.setAttribute('aria-expanded', String(on)); o.nextElementSibling.hidden = !on; openOpts[o.dataset.opts] = on; return; }
     var k = e.target.closest('[data-key]'); if (k) { toggle(k.dataset.key); return; }
     var c = e.target.closest('[data-cls]'); if (c && !c.closest('#sheet')) { setClass(+c.dataset.cls); return; }
   });
@@ -204,7 +219,7 @@
   function open(mode) {
     setMenu(false);
     B.mode = mode === 'cart' ? 'book' : mode; B.errs = {};
-    B.step = mode === 'cart' && cls != null ? 1 : 0;
+    B.step = mode === 'cart' && cls != null ? 1 : 0; if (mode === 'cart') B.cat = 'all';
     if (B.mode === 'book') { B.time = null; if (!B.day) B.day = ymd(new Date()); }
     lastFocus = document.activeElement; sheetOpen = true;
     sheet.classList.add('open'); sheet.setAttribute('aria-hidden', 'false'); document.documentElement.classList.add('lock');
@@ -213,7 +228,7 @@
   }
   NIK.open = open;
   function close() {
-    sheetOpen = false; sheet.classList.remove('open'); sheet.setAttribute('aria-hidden', 'true');
+    sheetOpen = false; B.shown = null; sheet.classList.remove('open'); sheet.setAttribute('aria-hidden', 'true');
     document.documentElement.classList.remove('lock'); renderBar(); if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
     if (B.done) { B.done = false; B.step = 0; document.dispatchEvent(new CustomEvent('nik:booked')); }
   }
@@ -239,7 +254,7 @@
     $('#steps').hidden = B.mode !== 'book' || s === 'done';
     $('.sheet__back', sheet).hidden = !(B.mode === 'book' && B.step > 0 && s !== 'done');
     $('#sheetTitle').textContent = { book: 'Запись', quick: 'Быстрая запись', mine: 'Мои записи' }[B.mode];
-    ({ class: stClass, services: stServices, time: stTime, contacts: stContacts, done: stDone, quick: stQuick, qdone: stQdone, mine: stMine })[s]();
+    var fn = ({ class: stClass, services: stServices, time: stTime, contacts: stContacts, done: stDone, quick: stQuick, qdone: stQdone, mine: stMine })[s]; fn(); B.shown = sheetOpen ? s : null;
   }
   function sum() { var n = cart.size; return n ? '<span class="sheet__sum">' + n + ' ' + plural(n, 'услуга', 'услуги', 'услуг') + ' · ≈ ' + hrs(hours()) + '<b>от ' + rub(total()) + '</b></span>' : ''; }
   function footer(label, ok, withSum, fn) {
@@ -253,12 +268,18 @@
     foot.innerHTML = cls != null ? sum() + '<button class="btn btn--ghost" type="button" id="bNext">Дальше: ' + esc(D.classes[cls][1]) + '</button>' : '<span class="sheet__sum">Шаг 1 из 4 · класс автомобиля</span>';
     var n = $('#bNext'); if (n) n.onclick = function () { B.step = 1; render(); };
   }
+  // выбранные услуги — первыми; порядок фиксируется при входе на шаг, чтобы строки не прыгали при отметке
+  function bookList() {
+    var all = D.services.filter(inCat(B.cat)), sel = all.filter(function (s) { return B.firstIds[s.id]; }), rest = all.filter(function (s) { return !B.firstIds[s.id]; });
+    if (!sel.length) return rest.map(row).join('');
+    return '<p class="svcs__h">Вы выбрали</p>' + sel.map(row).join('') + (rest.length ? '<p class="svcs__h">Остальные услуги</p>' + rest.map(row).join('') : '');
+  }
   function stServices() {
+    if (B.shown !== 'services') { B.firstIds = {}; D.services.forEach(function (s) { if (picked(s)) B.firstIds[s.id] = 1; }); }
     var cats = [['all', 'Все услуги']].concat(Object.keys(D.cats).map(function (k) { return [k, D.cats[k]]; }));
     body.innerHTML = '<div><h3>Что делаем?</h3><p class="note" style="margin-top:6px">' + esc(D.classes[C()][1]) + ' · цены «от» · можно выбрать несколько</p></div>' +
       '<div class="chips" role="group" aria-label="Категория">' + cats.map(function (c) { return '<button class="chip" type="button" data-scat="' + c[0] + '" aria-pressed="' + (B.cat === c[0]) + '">' + c[1] + '</button>'; }).join('') + '</div>' +
-      '<div class="svcs">' + list(B.cat) + '</div>';
-    restoreOpts(body);
+      '<div class="svcs">' + bookList() + '</div>';
     footer('Выбрать время', cart.size > 0, true, function () { if (cart.size) { B.step = 2; render(); body.scrollTop = 0; } });
   }
   function stTime() {
@@ -313,8 +334,8 @@
   }
   function leisure(h, n) {
     var p = V.plan(h);
-    return '<div><p class="lbl">Пока мы работаем · ≈ ' + hrs(h) + '</p><ul class="plan__list">' + p.items.slice(0, n || 4).map(function (it) {
-      return '<li><img src="places/' + it.img + '.webp" alt="" loading="lazy" width="44" height="44"><div><b>' + esc(it.label) + ': ' + esc(it.name) + '</b><span>' + esc(it.where) + '</span></div><em>' + (it.min ? '≈ ' + hrs(it.min / 60) : '') + '</em></li>';
+    return '<div><p class="lbl">Пока мы работаем — в Никольской Плазе</p><ul class="plan__list">' + p.items.slice(0, n || 4).map(function (it) {
+      return '<li><img src="places/' + it.img + '.webp" alt="" loading="lazy" width="44" height="44"><div><b>' + esc(it.label) + ': ' + esc(it.name) + '</b><span>' + esc(it.where) + '</span></div></li>';
     }).join('') + '</ul></div>';
   }
   NIK.leisure = leisure;
@@ -325,7 +346,7 @@
       '<div class="ready"><span>Мойка займёт ≈ ' + hrs(r.h) + '</span><b>' + (r.end ? 'Машина будет готова примерно к ' + r.end : 'Машина останется в паркинге до завтра') + '</b><span>Парковка бесплатна · Никольская, 10, паркинг −3 этаж · въезд с Большого Черкасского</span></div>' +
       '<div class="remind"><button class="btn btn--ghost btn--sm" type="button" data-ics="' + r.id + '">Добавить в календарь</button><a class="tg" href="https://t.me/carwash_na_nikolskoy" target="_blank" rel="noopener">Написать в Telegram</a></div>' +
       leisure(r.h) + '<p class="demo">Это демонстрация: запись сохранена только в этом браузере и никуда не отправлена. В рабочей версии напомним СМС или в Telegram за день до визита.</p>';
-    foot.innerHTML = '<a class="btn btn--ghost" href="park.html#plan">Весь досуг</a><button class="btn btn--copper" type="button" data-close>Готово</button>';
+    foot.innerHTML = '<a class="btn btn--ghost" href="park.html">Весь досуг</a><button class="btn btn--copper" type="button" data-close>Готово</button>';
   }
   function stQuick() {
     body.innerHTML = '<div><h3>Оставьте номер — мы перезвоним</h3><p class="note" style="margin-top:6px">Администратор свяжется с вами, подберёт услугу и удобное время.</p></div>' + fields(false);
@@ -438,7 +459,13 @@
 
   refresh(); visit();
   // переход по якорю после отрисовки каталога и шрифтов: страница встаёт ровно на нужный раздел
-  function goHash() { var h = decodeURIComponent(location.hash.slice(1)); var el = h && document.getElementById(h); if (el) el.scrollIntoView(); }
+  // «Яндекс Навигатор»: на телефоне открываем приложение, если его нет — маршрут в Яндекс Картах
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-navi]'); if (!a || !/android|iphone|ipad|ipod/i.test(navigator.userAgent)) return;
+    e.preventDefault(); var t0 = Date.now(); location.href = a.dataset.navi;
+    setTimeout(function () { if (!document.hidden && Date.now() - t0 < 2500) location.href = a.href; }, 1400);
+  });
+  function goHash() { var h = decodeURIComponent(location.hash.slice(1)); var el = h && (document.getElementById(h) || (D.cats[h] && document.getElementById('catalogTop'))); if (el) el.scrollIntoView(); }
   NIK.goHash = goHash;
   if (location.hash) { goHash(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(goHash); window.addEventListener('load', function () { setTimeout(goHash, 0); }); }
 })();
