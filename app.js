@@ -83,12 +83,14 @@
     } catch (e) {}
     try {
       var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-      actx = actx || new AC(); if (actx.state === 'suspended') actx.resume();
+      actx = actx || new AC(); if (actx.state === 'suspended') { var rp = actx.resume(); if (rp && rp.catch) rp.catch(function () {}); }
       var t = actx.currentTime, o = actx.createOscillator(), g = actx.createGain();
       o.type = 'sine'; o.frequency.setValueAtTime(on ? 1320 : 880, t); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.03, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
       o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + 0.06);
     } catch (e) {}
   }
+  // звук больше не нужен — закрываем аудио до ухода со страницы (Firefox иначе пишет в консоль «Navigated away from page»)
+  window.addEventListener('pagehide', function () { if (actx) { try { var cp = actx.close(); if (cp && cp.catch) cp.catch(function () {}); } catch (e) {} actx = null; } });
   function setClass(i) { cls = i; store.set('nik:cls', i); refresh(); }
   NIK.setClass = setClass;
 
@@ -283,11 +285,13 @@
     body.innerHTML = '<div><h3>Какой у вас автомобиль?</h3><p class="note" style="margin-top:6px">От класса зависит цена. Определим его по модели.</p></div>' + finderHtml(B.car) +
       '<p class="note">Или выберите класс сами</p>' + classCards(false) + '<p class="note">Класс уточняет мастер при приёмке автомобиля.</p>';
     bindFinder(body, function (c, label) { B.car = label; store.set('nik:car', label); setClass(c); B.step = 1; render(); body.scrollTop = 0; });
-    foot.innerHTML = cls != null ? sum() + '<button class="btn btn--ghost" type="button" id="bNext">Дальше: ' + esc(D.classes[cls][1]) + '</button>' : '<span class="sheet__sum">Шаг 1 из 4 · класс автомобиля</span>';
+    foot.innerHTML = cls != null ? sum() + '<button class="btn btn--ghost" type="button" id="bNext" aria-label="Дальше: ' + esc(D.classes[cls][1]) + '">Дальше</button>' : '<span class="sheet__sum">Шаг 1 из 4 · класс автомобиля</span>';
     var n = $('#bNext'); if (n) n.onclick = function () { B.step = 1; render(); };
   }
-  // выбранные услуги — первыми; порядок фиксируется при входе на шаг, чтобы строки не прыгали при отметке
+  // выбранные услуги — первыми; новые отметки не переставляют строки, снятые — уходят из «Вы выбрали»
   function bookList() {
+    // снятая галочка — услуга сразу уходит из «Вы выбрали» в общий список
+    D.services.forEach(function (s) { if (B.firstIds[s.id] && !picked(s)) delete B.firstIds[s.id]; });
     var all = D.services.filter(inCat(B.cat)), sel = all.filter(function (s) { return B.firstIds[s.id]; }), rest = all.filter(function (s) { return !B.firstIds[s.id]; });
     if (!sel.length) return rest.map(row).join('');
     return '<p class="svcs__h">Вы выбрали</p>' + sel.map(row).join('') + (rest.length ? '<p class="svcs__h">Остальные услуги</p>' + rest.map(row).join('') : '');
@@ -491,6 +495,10 @@
 
   refresh(); visit();
   // переход по якорю после отрисовки каталога и шрифтов: страница встаёт ровно на нужный раздел
+  // уходя со страницы, останавливаем загрузку видео
+  window.addEventListener('pagehide', function () { $$('video').forEach(function (v) { if (v.dataset.ok) { try { v.dataset.was = v.paused ? '' : '1'; v.pause(); $$('source', v).forEach(function (s) { s.removeAttribute('src'); }); v.removeAttribute('src'); v.load(); } catch (e) {} } }); });
+  // возврат кнопкой «Назад» (страница из кэша) — возвращаем видео
+  window.addEventListener('pageshow', function (ev) { if (!ev.persisted) return; $$('video').forEach(function (v) { if (!v.dataset.ok) return; $$('source', v).forEach(function (s) { s.src = s.dataset.src; }); v.load(); if (v.dataset.was) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); } }); });
   // «Яндекс Навигатор»: на телефоне открываем приложение, если его нет — маршрут в Яндекс Картах
   document.addEventListener('click', function (e) {
     var a = e.target.closest('[data-navi]'); if (!a || !/android|iphone|ipad|ipod/i.test(navigator.userAgent)) return;

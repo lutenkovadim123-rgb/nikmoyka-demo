@@ -351,7 +351,7 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 400; margin: 0; line-he
 .opt i { width: 22px; height: 22px; border-radius: 7px; border: 1.5px solid var(--line); display: grid; place-items: center; }
 .opt[aria-pressed="true"] i { background: var(--copper); border-color: var(--copper); }
 .opt[aria-pressed="true"] i::after { content: ""; width: 9px; height: 5px; border: solid #1a100a; border-width: 0 0 2px 2px; transform: translateY(-1px) rotate(-45deg); }
-@media (max-width: 560px) { .svc { grid-template-columns: 40px minmax(0, 1fr); padding: 14px; gap: 12px; } .svc__p { grid-column: 2; text-align: left; display: flex; gap: 10px; align-items: baseline; } .svc__ic { width: 40px; height: 40px; } .opts__list { padding-left: 14px; } }
+@media (max-width: 560px) { .svc { grid-template-columns: 40px minmax(0, 1fr); padding: 14px; gap: 12px; } .svc__p { grid-column: 2; text-align: left; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; } .svc__ic { width: 40px; height: 40px; } .opts__list { padding-left: 14px; } }
 .cartbar { position: fixed; z-index: 44; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(560px, calc(100% - 24px)); display: none; align-items: center; gap: 12px; padding: 10px 10px 10px 18px; border-radius: 99px; background: rgba(20, 16, 13, .96); border: 1px solid var(--line); box-shadow: 0 20px 40px -18px #000; }
 .cartbar.on { display: flex; animation: rise .4s ease; }
 .cartbar__sum { flex: 1; font-size: 14px; line-height: 1.25; min-width: 0; }
@@ -515,7 +515,8 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 400; margin: 0; line-he
 
 /* цены — моноширинные с тонкой золотой линией, как номера разделов */
 .svc__p b, .opt b, .cat__foot b, .promo__price, .cartbar__sum b, .sheet__sum b { letter-spacing: -.01em; background: linear-gradient(90deg, #6e4322, var(--copper-hi) 50%, #6e4322) no-repeat 0 100% / 100% 1px; padding-bottom: 3px; justify-self: end; }
-.cat__foot b, .promo__price, .cartbar__sum b, .sheet__sum b { justify-self: start; display: inline-block; }
+.cat__foot b, .promo__price { justify-self: start; display: inline-block; }
+.cartbar__sum b, .sheet__sum b { display: table; margin-top: 2px; }
 @media (max-width: 560px) { .svc__p b { justify-self: start; } }
 
 /* видео «дорога до мойки» */
@@ -527,3 +528,11 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 400; margin: 0; line-he
 .hero__free { margin: 2px 0 0; min-height: 35px; }
 .hero__free button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 9px; font: 500 13px var(--f-mono); letter-spacing: .04em; color: var(--paper); padding: 8px 14px; border-radius: 99px; border: 1px solid rgba(201, 135, 90, .45); background: rgba(10, 8, 7, .45); }
 .hero__free i { width: 7px; height: 7px; border-radius: 50%; background: #6fd08c; box-shadow: 0 0 0 3px rgba(111, 208, 140, .18); }
+.classbtn b { hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
+.sheet__foot .btn { min-width: 0; text-wrap: balance; }
+
+/* меню на маленьких экранах (iPhone SE): прокручивается, мессенджеры в одну строку */
+.menu { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.menu__msg { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.menu__msg .tg { margin: 0; }
+@media (max-height: 700px) { .menu__list a { padding: 13px 0; font-size: 28px; } .menu__side { padding-top: 16px; gap: 10px; } }
