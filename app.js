@@ -52,12 +52,14 @@
   var cls = store.get('nik:cls', null);
   var cart = new Map(store.get('nik:cart', []));
   var byId = {}; D.services.forEach(function (s) { byId[s.id] = s; });
+  // опции групп — отдельные услуги; подпись и длительность по группе
+  var OPTH = { 'dry-parts': 1 }, OPTNOTE = { 'wash-options': 'Дополнительно к мойке', 'interior-options': 'Уборка салона', 'dry-parts': 'Химчистка элемента салона', 'protect-options': 'Защита и полировка' };
   var pkgNames = {}; D.services.forEach(function (s) { if (!s.items) pkgNames[s.name] = 1; });
   function C() { return cls == null ? 0 : cls; }
   function save() { store.set('nik:cart', Array.from(cart.entries())); }
   function line(key) {
     var p = key.split(':'), s = byId[p[0]]; if (!s) return null;
-    if (p.length > 1) { var it = s.items[+p[1]]; return it ? { key: key, name: it.name, p: it.p, h: 0.25, off: 0 } : null; }
+    if (p.length > 1) { var it = s.items[+p[1]]; return it ? { key: key, name: it.name, p: it.p, h: OPTH[s.id] || 0.25, off: 0 } : null; }
     return { key: key, name: s.name, p: s.p, h: s.h, off: pct(s.id) };
   }
   function price(l) { return l.p[C()] * (1 - l.off / 100); }
@@ -105,34 +107,29 @@
   function icon(cat) { return '<span class="svc__ic"><svg viewBox="0 0 24 24" aria-hidden="true">' + (IC[cat] || IC.wash) + '</svg></span>'; }
 
   /* ---------- строки каталога ---------- */
-  function priceHtml(s) {
-    var off = pct(s.id), base = s.p[C()];
-    return '<span class="svc__p"><b>от ' + rub(base * (1 - off / 100)) + '</b>' + (off ? '<s>' + rub(base) + '</s>' : '') + '<span>≈ ' + hrs(s.h) + '</span></span>';
+  // все услуги — плоский список строк одного вида; опции групп тоже отдельные строки
+  var UNITS = [];
+  D.services.forEach(function (s) {
+    if (!s.items) { UNITS.push({ key: s.id, cat: s.cat, name: s.name, note: s.note, p: s.p, h: s.h, off: s.id }); return; }
+    s.items.forEach(function (it, i) { if (!pkgNames[it.name]) UNITS.push({ key: s.id + ':' + i, cat: s.cat, name: it.name, note: OPTNOTE[s.id] || 'Дополнительная услуга', p: it.p, h: OPTH[s.id] || 0.25, off: null }); });
+  });
+  var unitBy = {}; UNITS.forEach(function (u) { unitBy[u.key] = u; });
+  function priceHtml(u) {
+    var off = u.off ? pct(u.off) : 0, base = u.p[C()];
+    return '<span class="svc__p"><b>от ' + rub(base * (1 - off / 100)) + '</b>' + (off ? '<s>' + rub(base) + '</s>' : '') + '<span>≈ ' + hrs(u.h) + '</span></span>';
   }
-  function row(s) {
-    if (s.items) {
-      var n = s.items.filter(function (it) { return !pkgNames[it.name]; }).length;
-      var picked = s.items.some(function (_, i) { return cart.has(s.id + ':' + i); });
-      return '<div class="opts' + (picked ? ' opts--on' : '') + '"><div class="svc svc--head">' + icon(s.cat) +
-        '<span class="svc__n"><b>' + esc(s.name) + '</b><span>Отметьте нужное · ' + n + ' ' + plural(n, 'позиция', 'позиции', 'позиций') + '</span></span>' + priceHtml(s) + '</div>' +
-        '<div class="opts__list">' + s.items.map(function (it, i) {
-          if (pkgNames[it.name]) return '';
-          var k = s.id + ':' + i;
-          return '<button class="opt" type="button" data-key="' + k + '" aria-pressed="' + cart.has(k) + '"><span>' + esc(it.name) + '</span><b>от ' + rub(it.p[C()]) + '</b><i></i></button>';
-        }).join('') + '</div></div>';
-    }
-    var off = pct(s.id);
-    return '<button class="svc" type="button" data-key="' + s.id + '" aria-pressed="' + cart.has(s.id) + '">' + icon(s.cat) +
-      '<span class="svc__n"><b>' + esc(s.name) + '</b><span>' + esc(s.note) + '</span>' + (off ? '<em class="tag">−' + off + '% до 31 октября</em>' : '') + '</span>' + priceHtml(s) + '</button>';
+  function row(u) {
+    var off = u.off ? pct(u.off) : 0;
+    return '<button class="svc" type="button" data-key="' + u.key + '" aria-pressed="' + cart.has(u.key) + '">' + icon(u.cat) +
+      '<span class="svc__n"><b>' + esc(u.name) + '</b><span>' + esc(u.note) + '</span>' + (off ? '<em class="tag">−' + off + '% до 31 октября</em>' : '') + '</span>' + priceHtml(u) + '<i class="svc__ck" aria-hidden="true"></i></button>';
   }
-  function inCat(cat) { return function (s) { return cat === 'all' || s.cat === cat; }; }
-  function list(cat) { return D.services.filter(inCat(cat)).map(row).join(''); }
+  function inCat(cat) { return function (u) { return cat === 'all' || u.cat === cat; }; }
+  function list(cat) { return UNITS.filter(inCat(cat)).map(row).join(''); }
   // «Все услуги» на странице услуг — весь перечень с подзаголовками категорий
   function listGrouped(cat) {
     if (cat !== 'all') return list(cat);
     return Object.keys(D.cats).map(function (k) { return '<p class="svcs__h">' + esc(D.cats[k]) + '</p>' + list(k); }).join('');
   }
-  function picked(s) { return s.items ? s.items.some(function (_, i) { return cart.has(s.id + ':' + i); }) : cart.has(s.id); }
 
   /* ---------- выбор класса и поиск модели ---------- */
   var BRAND = { 'мерседес': 'mercedes', 'мерс': 'mercedes', 'бмв': 'bmw', 'ауди': 'audi', 'тойота': 'toyota', 'лексус': 'lexus', 'киа': 'kia', 'хендай': 'hyundai', 'хундай': 'hyundai', 'хёндай': 'hyundai', 'порше': 'porsche', 'порш': 'porsche', 'рендж': 'range rover', 'рейндж': 'range rover', 'ленд': 'land rover', 'лэнд': 'land rover', 'фольксваген': 'volkswagen', 'шкода': 'skoda', 'мазда': 'mazda', 'ниссан': 'nissan', 'вольво': 'volvo', 'тесла': 'tesla', 'мини': 'mini', 'хавал': 'haval', 'хавейл': 'haval', 'чери': 'chery', 'джили': 'geely', 'генезис': 'genesis', 'инфинити': 'infiniti', 'кадиллак': 'cadillac', 'бентли': 'bentley', 'ламборгини': 'lamborghini', 'феррари': 'ferrari', 'майбах': 'maybach', 'гелик': 'g-class', 'гелендваген': 'g-class', 'крузак': 'land cruiser', 'камри': 'camry', 'солярис': 'solaris', 'рио': 'rio', 'поло': 'polo', 'зикр': 'zeekr', 'лисян': 'li auto', 'танк': 'tank', 'роллс': 'rolls-royce', 'ягуар': 'jaguar', 'мазерати': 'maserati', 'чанган': 'changan', 'эксид': 'exeed', 'омода': 'omoda' };
@@ -278,30 +275,33 @@
   }
   function sum() { var n = cart.size; return n ? '<span class="sheet__sum">' + n + ' ' + plural(n, 'услуга', 'услуги', 'услуг') + ' · ≈ ' + hrs(hours()) + '<b>от ' + rub(total()) + '</b></span>' : ''; }
   function footer(label, ok, withSum, fn) {
-    foot.innerHTML = (withSum ? sum() : '') + '<button class="btn btn--copper" type="button" id="bNext"' + (ok ? '' : ' disabled') + '>' + label + '</button>';
+    var ic = { 'Выбрать время': 'i-clock', 'Дальше': 'i-arrow', 'Записаться': 'i-cart', 'Жду звонка': 'i-phone' }[label] || '';
+    foot.innerHTML = (withSum ? sum() : '') + '<button class="btn btn--copper ' + ic + '" type="button" id="bNext"' + (ok ? '' : ' disabled') + '>' + label + '</button>';
     $('#bNext').onclick = fn;
   }
   function stClass() {
     body.innerHTML = '<div><h3>Какой у вас автомобиль?</h3><p class="note" style="margin-top:6px">От класса зависит цена. Определим его по модели.</p></div>' + finderHtml(B.car) +
       '<p class="note">Или выберите класс сами</p>' + classCards(false) + '<p class="note">Класс уточняет мастер при приёмке автомобиля.</p>';
     bindFinder(body, function (c, label) { B.car = label; store.set('nik:car', label); setClass(c); B.step = 1; render(); body.scrollTop = 0; });
-    foot.innerHTML = cls != null ? sum() + '<button class="btn btn--ghost" type="button" id="bNext" aria-label="Дальше: ' + esc(D.classes[cls][1]) + '">Дальше</button>' : '<span class="sheet__sum">Шаг 1 из 4 · класс автомобиля</span>';
+    foot.innerHTML = cls != null ? sum() + '<button class="btn btn--ghost i-arrow" type="button" id="bNext" aria-label="Дальше: ' + esc(D.classes[cls][1]) + '">Дальше</button>' : '<span class="sheet__sum">Шаг 1 из 4 · класс автомобиля</span>';
     var n = $('#bNext'); if (n) n.onclick = function () { B.step = 1; render(); };
   }
-  // выбранные услуги — первыми; новые отметки не переставляют строки, снятые — уходят из «Вы выбрали»
-  function bookList() {
-    // снятая галочка — услуга сразу уходит из «Вы выбрали» в общий список
-    D.services.forEach(function (s) { if (B.firstIds[s.id] && !picked(s)) delete B.firstIds[s.id]; });
-    var all = D.services.filter(inCat(B.cat)), sel = all.filter(function (s) { return B.firstIds[s.id]; }), rest = all.filter(function (s) { return !B.firstIds[s.id]; });
-    if (!sel.length) return rest.map(row).join('');
-    return '<p class="svcs__h">Вы выбрали</p>' + sel.map(row).join('') + (rest.length ? '<p class="svcs__h">Остальные услуги</p>' + rest.map(row).join('') : '');
+  // «Вы выбрали» — только отмеченные услуги, отдельной панелью сверху; снятая галочка сразу убирает строку,
+  // новые отметки в общем списке остаются на месте, чтобы строки не прыгали под пальцем
+  function chosenHtml() {
+    Object.keys(B.firstIds).forEach(function (k) { if (!cart.has(k)) delete B.firstIds[k]; });
+    var sel = UNITS.filter(function (u) { return B.firstIds[u.key]; });
+    if (!sel.length) return '';
+    return '<section class="chosen" aria-label="Вы выбрали"><div class="chosen__head"><span class="chosen__ic" aria-hidden="true"></span><b>Вы выбрали</b><span>' + sel.length + ' ' + plural(sel.length, 'услуга', 'услуги', 'услуг') + '</span></div><div class="svcs">' + sel.map(row).join('') + '</div></section>';
   }
   function stServices() {
-    if (B.shown !== 'services') { B.firstIds = {}; D.services.forEach(function (s) { if (picked(s)) B.firstIds[s.id] = 1; }); }
+    if (B.shown !== 'services') { B.firstIds = {}; cart.forEach(function (_, k) { if (unitBy[k]) B.firstIds[k] = 1; }); }
     var cats = [['all', 'Все услуги']].concat(Object.keys(D.cats).map(function (k) { return [k, D.cats[k]]; }));
-    body.innerHTML = '<div><h3>Что делаем?</h3><p class="note" style="margin-top:6px">' + esc(D.classes[C()][1]) + ' · цены «от» · можно выбрать несколько</p></div>' +
+    var ch = chosenHtml(), rest = UNITS.filter(inCat(B.cat)).filter(function (u) { return !B.firstIds[u.key]; });
+    body.innerHTML = '<div><h3>Что делаем?</h3><p class="note" style="margin-top:6px">' + esc(D.classes[C()][1]) + ' · цены «от» · можно выбрать несколько</p></div>' + ch +
+      (ch ? '<p class="svcs__h">Добавить ещё</p>' : '') +
       '<div class="chips" role="group" aria-label="Категория">' + cats.map(function (c) { return '<button class="chip" type="button" data-scat="' + c[0] + '" aria-pressed="' + (B.cat === c[0]) + '">' + c[1] + '</button>'; }).join('') + '</div>' +
-      '<div class="svcs">' + bookList() + '</div>';
+      '<div class="svcs">' + rest.map(row).join('') + '</div>';
     footer('Выбрать время', cart.size > 0, true, function () { if (cart.size) { B.step = 2; render(); body.scrollTop = 0; } });
   }
   function stTime() {
@@ -368,7 +368,7 @@
       '<div class="ready"><span>Мойка займёт ≈ ' + hrs(r.h) + '</span><b>' + (r.end ? 'Машина будет готова примерно к ' + r.end : 'Машина останется в паркинге до завтра') + '</b><span>Парковка бесплатна · Никольская, 10, паркинг −3 этаж · въезд с Большого Черкасского</span></div>' +
       '<div class="remind"><button class="btn btn--ghost btn--sm" type="button" data-ics="' + r.id + '">Добавить в календарь</button><a class="tg" href="https://t.me/carwash_na_nikolskoy" target="_blank" rel="noopener">Написать в Telegram</a></div>' +
       leisure(r.h) + '<p class="demo">Это демонстрация: запись сохранена только в этом браузере и никуда не отправлена. В рабочей версии напомним СМС или в Telegram за день до визита.</p>';
-    foot.innerHTML = '<a class="btn btn--ghost" href="park.html">Весь досуг</a><button class="btn btn--copper" type="button" data-close>Готово</button>';
+    foot.innerHTML = '<a class="btn btn--ghost i-compass" href="park.html">Весь досуг</a><button class="btn btn--copper i-check" type="button" data-close>Готово</button>';
   }
   function stQuick() {
     body.innerHTML = '<div><h3>Оставьте номер — мы перезвоним</h3><p class="note" style="margin-top:6px">Администратор свяжется с вами, подберёт услугу и удобное время.</p></div>' + fields(false);
@@ -385,13 +385,13 @@
     body.innerHTML = '<span class="okmark"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><div><h3>Спасибо, ' + esc(B.name.trim()) + '!</h3><p class="note" style="margin-top:6px">' + (open ? 'Администратор перезвонит в течение 15 минут.' : 'Мы работаем с 9:00 до 21:00 — перезвоним утром.') + '</p></div>' +
       '<div class="summary"><div><span>Телефон</span><b>' + esc(B.phone) + '</b></div></div><p class="note">Не хотите ждать? Позвоните: <a href="tel:+74955320977">+7 495 532-09-77</a> или <a href="tel:+79250344442">+7 925 034-44-42</a>.</p>' +
       '<p class="demo">Демо: заявка сохранена только в этом браузере.</p>';
-    foot.innerHTML = '<button class="btn btn--copper" type="button" data-close>Готово</button>';
+    foot.innerHTML = '<button class="btn btn--copper i-check" type="button" data-close>Готово</button>';
   }
   function stMine() {
     var all = store.get('nik:bookings', []).filter(function (r) { return new Date(r.day + 'T' + r.time) > new Date(Date.now() - 3 * 3600e3); });
     body.innerHTML = all.length ? '<div class="mine">' + all.map(function (r) {
       return '<div class="mine__item"><b>' + dayLabel(r.day) + ', ' + r.time + '</b><span>' + esc(r.items.join(', ')) + '</span><span>Код ' + r.code + ' · от ' + rub(r.total) + ' · ≈ ' + hrs(r.h) + '</span>' +
-        '<div class="remind"><button class="btn btn--copper btn--sm" type="button" data-ics="' + r.id + '">Напомнить: в календарь</button><button class="btn btn--ghost btn--sm" type="button" data-cancel="' + r.id + '">Отменить</button></div></div>';
+        '<div class="remind"><button class="btn btn--copper btn--sm" type="button" data-ics="' + r.id + '">Напомнить: в календарь</button><button class="btn btn--ghost btn--sm i-x" type="button" data-cancel="' + r.id + '">Отменить</button></div></div>';
     }).join('') + '</div><p class="note">Календарь телефона напомнит за день и за 2 часа до визита. В рабочей версии — ещё и СМС или сообщение в Telegram, а найти записи можно будет по телефону с любого устройства.</p>' : '<p class="note">На этом устройстве записей нет.</p>';
     foot.innerHTML = '<button class="btn btn--copper" type="button" data-open="book">Новая запись</button>';
     $$('[data-cancel]', body).forEach(function (b) {

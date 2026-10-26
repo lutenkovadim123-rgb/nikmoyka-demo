@@ -13,7 +13,7 @@
     root.innerHTML = '<form class="owner" id="ownerForm" autocomplete="off"><span class="num">Владелец</span><h2>Вход в админку</h2>' +
       '<div class="field"><label for="oLogin">Логин</label><input id="oLogin" autocomplete="username" required></div>' +
       '<div class="field"><label for="oPass">Пароль</label><input id="oPass" type="password" autocomplete="current-password" required></div>' +
-      '<button class="btn btn--copper" type="submit">Войти</button>' +
+      '<button class="btn btn--copper i-login" type="submit">Войти</button>' +
       '<p class="demo">Демо: вход без проверки пароля, ничего не отправляется. В рабочей версии — учётка владельца и администраторов, вход по паролю на сервере.</p></form>';
     document.getElementById('ownerForm').onsubmit = function (e) { e.preventDefault(); try { sessionStorage.setItem('nik:owner', '1'); } catch (x) {} render(); };
   }
