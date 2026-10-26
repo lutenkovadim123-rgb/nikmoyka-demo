@@ -46,6 +46,42 @@
   $$('[data-until]').forEach(function (el) { if (new Date() > new Date(el.dataset.until)) el.hidden = true; });
   function pct(id) { return promoOn ? PROMO.pct[id] || 0 : 0; }
 
+  /* ---------- движение: только transform и opacity, при «Уменьшить движение» — без анимаций ---------- */
+  var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // сумма-«барабан»: цифры прокручиваются от прошлого значения к новому
+  var rollLast = {};
+  function rollHtml(txt, digitsFrom) {
+    var di = 0, cols = txt.replace(/\d/g, '0').length;
+    return '<span class="sr">' + txt + '</span><span class="roll" aria-hidden="true">' + txt.split('').map(function (ch) {
+      if (!/\d/.test(ch)) return '<span class="roll__c">' + (ch === ' ' || ch === '\u00a0' ? '&nbsp;' : ch) + '</span>';
+      var d = digitsFrom ? digitsFrom[di] : +ch; di++;
+      return '<span class="dg"><i data-to="' + ch + '" style="transform:translateY(-' + (d * 10) + '%)"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></i></span>';
+    }).join('') + '</span>';
+  }
+  function roll(root) {
+    $$('[data-roll]', root).forEach(function (el) {
+      var key = el.dataset.roll, txt = el.dataset.val, prev = rollLast[key];
+      var nd = (txt.match(/\d/g) || []), pd = prev ? (prev.match(/\d/g) || []) : null, from = null;
+      if (pd && !calm && prev !== txt) { from = nd.map(function (_, i) { var j = pd.length - nd.length + i; return j >= 0 ? +pd[j] : 0; }); }
+      el.innerHTML = rollHtml(txt, from); rollLast[key] = txt;
+      if (from) requestAnimationFrame(function () { requestAnimationFrame(function () { $$('.dg i', el).forEach(function (c) { c.style.transform = 'translateY(-' + (+c.dataset.to * 10) + '%)'; }); }); });
+    });
+  }
+  function rollTag(key, txt) { return '<b data-roll="' + key + '" data-val="' + txt + '">' + txt + '</b>'; }
+  // медная подсветка, скользящая по чипам
+  var pillLast = {};
+  function pill(box, key) {
+    if (!box) return; var on = box.querySelector('[aria-pressed="true"]'); if (!on) return;
+    box.classList.add('chips--pill'); var p = box.querySelector('.chips__pill');
+    if (!p) { p = document.createElement('i'); p.className = 'chips__pill'; p.setAttribute('aria-hidden', 'true'); box.insertBefore(p, box.firstChild); }
+    var to = [on.offsetLeft, on.offsetWidth], from = pillLast[key];
+    function at(v) { p.style.width = v[1] + 'px'; p.style.transform = 'translateX(' + v[0] + 'px)'; }
+    if (from && !calm && (from[0] !== to[0] || from[1] !== to[1])) { p.style.transition = 'none'; at(from); p.offsetWidth; p.style.transition = ''; }
+    else p.style.transition = 'none';
+    at(to); pillLast[key] = to;
+  }
+  var justKey = null;   // строка, которую только что отметили — у неё галочка рисуется
+
   /* ---------- класс и корзина ---------- */
   var KINDS = ['sedan', 'sport', 'crossover', 'suv'];
   var EX = ['Kia Rio, Toyota Camry, BMW 3', 'Mercedes S, BMW 7, Porsche Panamera', 'Kia Sportage, BMW X3, Mercedes GLC', 'Mercedes GLS / G, BMW X5–X7, Land Cruiser'];
@@ -72,7 +108,20 @@
     return Math.max(1, Math.round(h * 2) / 2);
   }
   NIK.cart = { lines: lines, total: total, hours: hours, has: function (k) { return cart.has(k); } };
-  function toggle(k) { var on = !cart.has(k); if (on) cart.set(k, 1); else cart.delete(k); save(); refresh(); feel(on); }
+  function toggle(k) {
+    var on = !cart.has(k); if (on) cart.set(k, 1); else cart.delete(k); save(); justKey = on ? k : null;
+    // в окне записи строка плавно перелетает в «Вы выбрали» и обратно (View Transitions; где их нет — мгновенно)
+    var inSheet = sheetOpen && STEPS[B.mode][B.step] === 'services';
+    if (inSheet) { if (on) B.firstIds[k] = 1; else delete B.firstIds[k]; }
+    if (inSheet && document.startViewTransition && !calm) {
+      // имена перелёта — только у строк, целиком видимых в окне: иначе строки у края прокрутки рисуются поверх шапки
+      var nameVisible = function () { var br = body.getBoundingClientRect(); $$('.svc[data-key]', body).forEach(function (el) { var r = el.getBoundingClientRect(); if (r.top >= br.top - 1 && r.bottom <= br.bottom + 1) el.style.viewTransitionName = 's-' + el.dataset.key.replace(/[^a-z0-9]/gi, '-'); }); };
+      nameVisible(); document.documentElement.classList.add('vt-sheet');
+      var t = document.startViewTransition(function () { refresh(); nameVisible(); });
+      t.finished.then(function () { document.documentElement.classList.remove('vt-sheet'); }, function () { document.documentElement.classList.remove('vt-sheet'); });
+    } else refresh();
+    feel(on);
+  }
   // тихий отклик на отметку услуги: вибрация (Android), системный «тик» переключателя (iOS 18+), едва слышный щелчок
   var hapt = null, actx = null;
   function feel(on) {
@@ -118,13 +167,13 @@
     var off = u.off ? pct(u.off) : 0, base = u.p[C()];
     return '<span class="svc__p"><b>от ' + rub(base * (1 - off / 100)) + '</b>' + (off ? '<s>' + rub(base) + '</s>' : '') + '<span>≈ ' + hrs(u.h) + '</span></span>';
   }
-  function row(u) {
+  function row(u, vt) {
     var off = u.off ? pct(u.off) : 0;
     return '<button class="svc" type="button" data-key="' + u.key + '" aria-pressed="' + cart.has(u.key) + '">' + icon(u.cat) +
-      '<span class="svc__n"><b>' + esc(u.name) + '</b><span>' + esc(u.note) + '</span>' + (off ? '<em class="tag">−' + off + '% до 31 октября</em>' : '') + '</span>' + priceHtml(u) + '<i class="svc__ck" aria-hidden="true"></i></button>';
+      '<span class="svc__n"><b>' + esc(u.name) + '</b><span>' + esc(u.note) + '</span>' + (off ? '<em class="tag">−' + off + '% до 31 октября</em>' : '') + '</span>' + priceHtml(u) + '<i class="svc__ck' + (justKey === u.key ? ' svc__ck--draw' : '') + '" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2L18.5 8"/></svg></i></button>';
   }
   function inCat(cat) { return function (u) { return cat === 'all' || u.cat === cat; }; }
-  function list(cat) { return UNITS.filter(inCat(cat)).map(row).join(''); }
+  function list(cat) { return UNITS.filter(inCat(cat)).map(function (u) { return row(u); }).join(''); }
   // «Все услуги» на странице услуг — весь перечень с подзаголовками категорий
   function listGrouped(cat) {
     if (cat !== 'all') return list(cat);
@@ -200,6 +249,7 @@
     var cb = $('#classCards'); if (cb) cb.innerHTML = classCards(true);
     var box = $('#catalog'); if (box) box.innerHTML = listGrouped(pcat);
     $$('[data-pcat]', page).forEach(function (b) { var on = b.dataset.pcat === pcat; b.setAttribute('aria-pressed', String(on)); if (on && b.parentNode.scrollWidth > b.parentNode.clientWidth) b.parentNode.scrollLeft = b.offsetLeft - 16; });
+    pill($('#catalogTop'), 'page');
     var lab = $('#classLabel'); if (lab) lab.textContent = cls == null ? 'Цены для седана. Выберите класс, чтобы увидеть свои.' : 'Цены «от» для класса: ' + D.classes[cls][1] + '.';
   }
   if (page) {
@@ -209,7 +259,7 @@
   function renderBar() {
     if (!bar) return;
     var n = cart.size; bar.classList.toggle('on', n > 0 && !sheetOpen);
-    $('#cartbarSum').innerHTML = n + ' ' + plural(n, 'услуга', 'услуги', 'услуг') + ' · ≈ ' + hrs(hours()) + '<b>от ' + rub(total()) + '</b>';
+    $('#cartbarSum').innerHTML = n + ' ' + plural(n, 'услуга', 'услуги', 'услуг') + ' · ≈ ' + hrs(hours()) + rollTag('bar', 'от ' + rub(total())); roll(bar);
   }
   function badges() { $$('[data-cartcount]').forEach(function (b) { b.textContent = cart.size; b.hidden = !cart.size; }); }
   function refresh() { renderPage(); renderBar(); badges(); if (sheetOpen) render(); }
@@ -233,8 +283,12 @@
     for (var m = 540; m <= last * 60; m += 30) { var t = String(Math.floor(m / 60)).padStart(2, '0') + ':' + (m % 60 ? '30' : '00'); out.push({ t: t, off: new Date(day + 'T' + t + ':00') - now < 3600e3 || busy(day, t) }); }
     return out;
   }
-  function open(mode) {
+  function open(mode, src) {
     setMenu(false);
+    var pn = $('.sheet__panel', sheet);
+    if (pn) { var r = src && src.getBoundingClientRect ? src.getBoundingClientRect() : null, W = innerWidth, pw = Math.min(560, W);
+      var px = r ? r.left + r.width / 2 - (W - pw) : pw / 2, py = r ? r.top + r.height / 2 : innerHeight;
+      pn.style.setProperty('--ox', px + 'px'); pn.style.setProperty('--oy', py + 'px'); }
     B.mode = mode === 'cart' ? 'book' : mode; B.errs = {};
     B.step = mode === 'cart' && cls != null ? 1 : 0; if (mode === 'cart') B.cat = 'all';
     if (B.mode === 'book') { B.time = null; if (!B.day) B.day = ymd(new Date()); }
@@ -258,8 +312,8 @@
     });
   }
   document.addEventListener('click', function (e) {
-    var o = e.target.closest('[data-open]'); if (o) { e.preventDefault(); open(o.dataset.open); return; }
-    var p = e.target.closest('[data-promo]'); if (p) { e.preventDefault(); p.dataset.promo.split(',').forEach(function (k) { cart.set(k, 1); }); save(); refresh(); B.cat = byId[p.dataset.promo.split(',')[0]].cat; open('book'); }
+    var o = e.target.closest('[data-open]'); if (o) { e.preventDefault(); open(o.dataset.open, o); return; }
+    var p = e.target.closest('[data-promo]'); if (p) { e.preventDefault(); p.dataset.promo.split(',').forEach(function (k) { cart.set(k, 1); }); save(); refresh(); B.cat = byId[p.dataset.promo.split(',')[0]].cat; open('book', p); }
   });
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
@@ -273,26 +327,25 @@
     $('#sheetTitle').textContent = { book: 'Запись', quick: 'Быстрая запись', mine: 'Мои записи' }[B.mode];
     var fn = ({ class: stClass, services: stServices, time: stTime, contacts: stContacts, done: stDone, quick: stQuick, qdone: stQdone, mine: stMine })[s]; fn(); B.shown = sheetOpen ? s : null;
   }
-  function sum() { var n = cart.size; return n ? '<span class="sheet__sum">' + n + ' ' + plural(n, 'услуга', 'услуги', 'услуг') + ' · ≈ ' + hrs(hours()) + '<b>от ' + rub(total()) + '</b></span>' : ''; }
+  function sum() { var n = cart.size; return n ? '<span class="sheet__sum">' + n + ' ' + plural(n, 'услуга', 'услуги', 'услуг') + ' · ≈ ' + hrs(hours()) + rollTag('sheet', 'от ' + rub(total())) + '</span>' : ''; }
   function footer(label, ok, withSum, fn) {
     var ic = { 'Выбрать время': 'i-clock', 'Дальше': 'i-arrow', 'Записаться': 'i-cart', 'Жду звонка': 'i-phone' }[label] || '';
     foot.innerHTML = (withSum ? sum() : '') + '<button class="btn btn--copper ' + ic + '" type="button" id="bNext"' + (ok ? '' : ' disabled') + '>' + label + '</button>';
-    $('#bNext').onclick = fn;
+    $('#bNext').onclick = fn; roll(foot);
   }
   function stClass() {
     body.innerHTML = '<div><h3>Какой у вас автомобиль?</h3><p class="note" style="margin-top:6px">От класса зависит цена. Определим его по модели.</p></div>' + finderHtml(B.car) +
       '<p class="note">Или выберите класс сами</p>' + classCards(false) + '<p class="note">Класс уточняет мастер при приёмке автомобиля.</p>';
     bindFinder(body, function (c, label) { B.car = label; store.set('nik:car', label); setClass(c); B.step = 1; render(); body.scrollTop = 0; });
     foot.innerHTML = cls != null ? sum() + '<button class="btn btn--ghost i-arrow" type="button" id="bNext" aria-label="Дальше: ' + esc(D.classes[cls][1]) + '">Дальше</button>' : '<span class="sheet__sum">Шаг 1 из 4 · класс автомобиля</span>';
-    var n = $('#bNext'); if (n) n.onclick = function () { B.step = 1; render(); };
+    var n = $('#bNext'); if (n) n.onclick = function () { B.step = 1; render(); }; roll(foot);
   }
-  // «Вы выбрали» — только отмеченные услуги, отдельной панелью сверху; снятая галочка сразу убирает строку,
-  // новые отметки в общем списке остаются на месте, чтобы строки не прыгали под пальцем
+  // «Вы выбрали» — только отмеченные услуги, отдельной панелью сверху: отмеченная строка перелетает в панель, снятая — обратно
   function chosenHtml() {
     Object.keys(B.firstIds).forEach(function (k) { if (!cart.has(k)) delete B.firstIds[k]; });
     var sel = UNITS.filter(function (u) { return B.firstIds[u.key]; });
     if (!sel.length) return '';
-    return '<section class="chosen" aria-label="Вы выбрали"><div class="chosen__head"><span class="chosen__ic" aria-hidden="true"></span><b>Вы выбрали</b><span>' + sel.length + ' ' + plural(sel.length, 'услуга', 'услуги', 'услуг') + '</span></div><div class="svcs">' + sel.map(row).join('') + '</div></section>';
+    return '<section class="chosen" aria-label="Вы выбрали"><div class="chosen__head"><span class="chosen__ic" aria-hidden="true"></span><b>Вы выбрали</b><span>' + sel.length + ' ' + plural(sel.length, 'услуга', 'услуги', 'услуг') + '</span></div><div class="svcs">' + sel.map(function (u) { return row(u, true); }).join('') + '</div></section>';
   }
   function stServices() {
     if (B.shown !== 'services') { B.firstIds = {}; cart.forEach(function (_, k) { if (unitBy[k]) B.firstIds[k] = 1; }); }
@@ -301,8 +354,9 @@
     body.innerHTML = '<div><h3>Что делаем?</h3><p class="note" style="margin-top:6px">' + esc(D.classes[C()][1]) + ' · цены «от» · можно выбрать несколько</p></div>' + ch +
       (ch ? '<p class="svcs__h">Добавить ещё</p>' : '') +
       '<div class="chips" role="group" aria-label="Категория">' + cats.map(function (c) { return '<button class="chip" type="button" data-scat="' + c[0] + '" aria-pressed="' + (B.cat === c[0]) + '">' + c[1] + '</button>'; }).join('') + '</div>' +
-      '<div class="svcs">' + rest.map(row).join('') + '</div>';
+      '<div class="svcs">' + rest.map(function (u) { return row(u, true); }).join('') + '</div>';
     footer('Выбрать время', cart.size > 0, true, function () { if (cart.size) { B.step = 2; render(); body.scrollTop = 0; } });
+    pill($('.chips', body), 'sheet');
   }
   function stTime() {
     var days = [], d0 = new Date(); for (var i = 0; i < 14; i++) { var d = new Date(d0); d.setDate(d0.getDate() + i); days.push(d); }
@@ -362,10 +416,14 @@
   }
   NIK.leisure = leisure;
   function stDone() {
-    var r = B.last;
-    body.innerHTML = '<span class="okmark"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><div><h3>Вы записаны</h3><p class="note" style="margin-top:6px">Код записи <b style="color:var(--copper-hi)">' + r.code + '</b> · администратор подтвердит по телефону</p></div>' +
-      '<div class="summary"><div><span>Заезд</span><b>' + dayLabel(r.day) + ', ' + r.time + '</b></div>' + r.items.map(function (n) { return '<div><span>' + esc(n) + '</span></div>'; }).join('') + '<div><span>Итого</span><b>от ' + rub(r.total) + '</b></div></div>' +
-      '<div class="ready"><span>Мойка займёт ≈ ' + hrs(r.h) + '</span><b>' + (r.end ? 'Машина будет готова примерно к ' + r.end : 'Машина останется в паркинге до завтра') + '</b><span>Парковка бесплатна · Никольская, 10, паркинг −3 этаж · въезд с Большого Черкасского</span></div>' +
+    var r = B.last, d = new Date(r.day + 'T12:00:00');
+    body.innerHTML = '<div class="ticket"><div class="ticket__top"><span class="okmark"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><div><h3>Вы записаны</h3><p class="note">Администратор подтвердит по телефону</p></div></div>' +
+      '<div class="ticket__when"><div><small>Дата</small><b>' + d.getDate() + ' ' + MON[d.getMonth()] + '</b><span>' + DAYS[d.getDay()] + '</span></div><div><small>Заезд</small><b>' + r.time + '</b><span>' + (r.end ? 'готово ≈ ' + r.end : 'до завтра') + '</span></div><div><small>Код</small><b>' + r.code + '</b><span>назовите на месте</span></div></div>' +
+      '<div class="ticket__cut" aria-hidden="true"></div>' +
+      '<ul class="ticket__items">' + r.items.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul>' +
+      '<div class="ticket__foot"><span>Итого · ≈ ' + hrs(r.h) + '</span><b>от ' + rub(r.total) + '</b></div>' +
+      '<p class="ticket__addr">Никольская, 10 · паркинг −3 этаж · въезд через арку с Большого Черкасского · парковка бесплатна</p>' +
+      '<img class="ticket__logo" src="logo.webp" alt="" width="70" height="32"></div>' +
       '<div class="remind"><button class="btn btn--ghost btn--sm" type="button" data-ics="' + r.id + '">Добавить в календарь</button><a class="tg" href="https://t.me/carwash_na_nikolskoy" target="_blank" rel="noopener">Написать в Telegram</a></div>' +
       leisure(r.h) + '<p class="demo">Это демонстрация: запись сохранена только в этом браузере и никуда не отправлена. В рабочей версии напомним СМС или в Telegram за день до визита.</p>';
     foot.innerHTML = '<a class="btn btn--ghost i-compass" href="park.html">Весь досуг</a><button class="btn btn--copper i-check" type="button" data-close>Готово</button>';
@@ -438,7 +496,7 @@
   function chapters(v) {
     var cap = v.parentNode.querySelector('.entrance__cap'); if (!cap || !v.dataset.chapters) return;
     var ch = v.dataset.chapters.split('|').map(function (x) { var i = x.indexOf(':'); return [+x.slice(0, i), x.slice(i + 1)]; }), cur = '';
-    v.addEventListener('timeupdate', function () { var t = v.currentTime, n = ch[0][1]; ch.forEach(function (c) { if (t >= c[0]) n = c[1]; }); if (n !== cur) { cur = n; cap.textContent = n; } });
+    v.addEventListener('timeupdate', function () { var t = v.currentTime, n = ch[0][1]; ch.forEach(function (c) { if (t >= c[0]) n = c[1]; }); if (n !== cur) { cur = n; if (calm) { cap.textContent = n; return; } cap.classList.add('swap'); setTimeout(function () { cap.textContent = n; cap.classList.remove('swap'); }, 220); } });
   }
   // «Сегодня свободно с …» под кнопкой записи (демо-расписание; в рабочей версии — свободные окна Core12)
   (function () {
