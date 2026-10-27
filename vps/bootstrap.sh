@@ -1,7 +1,8 @@
 #!/bin/bash
 # Первый запуск на новом VPS (Ubuntu 24.04), одной командой из веб-консоли Бегета:
 #   curl -fsSL https://lutenkovadim123-rgb.github.io/nikmoyka-demo/vps/bootstrap.sh | sudo bash
-#   или короче (от root): curl -sL lutenkovadim123-rgb.github.io/nikmoyka-demo/b | bash
+#   если github.io недоступен из сети сервера (так бывает в РФ):
+#   curl -fsSL https://raw.githubusercontent.com/lutenkovadim123-rgb/nikmoyka-demo/main/b | bash
 # Что делает: ставит git, создаёт ключ только для чтения репозитория, ждёт, пока его добавят в GitHub,
 # забирает код из ветки production и запускает setup.sh и первую выкладку. Дальше сервер сам забирает обновления.
 set -euo pipefail
@@ -14,6 +15,9 @@ KEY=/root/.ssh/nikmoyka_deploy
 [ -f $KEY ] || ssh-keygen -t ed25519 -N '' -C "nikmoyka-vps-deploy" -f $KEY >/dev/null
 cat > /root/.ssh/config <<CFG
 Host github.com
+  # SSH через порт 443: работает и там, где порт 22 закрыт
+  Hostname ssh.github.com
+  Port 443
   IdentityFile $KEY
   IdentitiesOnly yes
   StrictHostKeyChecking accept-new
