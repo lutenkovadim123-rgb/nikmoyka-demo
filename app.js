@@ -240,7 +240,9 @@
       var b = e.target.closest('[data-pcat]'); if (!b) return;
       pcat = b.dataset.pcat; renderPage();
       try { history.replaceState(null, '', pcat === 'all' ? location.pathname : '#' + pcat); } catch (x) {}
-      var top = $('#catalogTop'); if (top && top.getBoundingClientRect().top < 0) top.scrollIntoView();
+      // после смены категории список начинается сразу под липкой строкой чипов — без прыжков страницы
+      var top = $('#catalogTop'), box = $('#catalog');
+      if (top && box) { var want = box.getBoundingClientRect().top + scrollY - top.offsetHeight - (parseFloat(getComputedStyle(top).top) || 62) - 12; if (scrollY > want) scrollTo(0, want); }
     });
     window.addEventListener('hashchange', function () { if (hashCat()) { pcat = hashCat(); renderPage(); } });
   }

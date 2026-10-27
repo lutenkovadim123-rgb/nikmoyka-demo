@@ -76,7 +76,7 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 400; margin: 0; line-he
 .x { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line-2); background: none; cursor: pointer; font-size: 18px; flex: none; }
 .tabbar { display: none; }
 @media (max-width: 860px) {
-  .top nav, .top__cta { display: none; }
+  .top nav, .top__cta, .top__mine { display: none; }
   .top__menu { display: inline-flex; }
   .tabbar { position: fixed; z-index: 45; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(5, 1fr); align-items: end; padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); background: rgba(14, 11, 9, .96); border-top: 1px solid var(--line-2); }
   .tab { display: grid; justify-items: center; gap: 3px; padding: 4px 0; background: none; border: 0; text-decoration: none; color: var(--muted); font-size: 10.5px; cursor: pointer; position: relative; }
@@ -599,7 +599,7 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 400; margin: 0; line-he
 @keyframes okring { 0% { transform: scale(.8); opacity: .9; } 100% { transform: scale(1.5); opacity: 0; } }
 
 /* медная подсветка скользит по чипам */
-.chips--pill { position: relative; }
+.chips--pill:not(.catchips) { position: relative; }
 .chips__pill { position: absolute; left: 0; top: 0; height: calc(100% - 2px); border-radius: 99px; background: var(--paper); transition: transform .42s cubic-bezier(.2, .9, .25, 1), width .42s cubic-bezier(.2, .9, .25, 1); pointer-events: none; z-index: 0; }
 .chips--pill .chip { position: relative; z-index: 1; transition: color .25s; }
 .chips--pill .chip[aria-pressed="true"] { background: transparent; border-color: transparent; }
@@ -649,3 +649,11 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 200; pointer-even
 }
 html.vt-sheet .top, html.vt-sheet .tabbar { view-transition-name: none; }
 .sheet .svc { background: var(--ink-3); }
+
+/* липкая строка категорий на странице услуг: всегда сверху, сплошной фон на всю ширину — строки не просвечивают и не «съезжают» под неё */
+.catchips { position: sticky; top: calc(62px + env(safe-area-inset-top, 0px)); z-index: 6; background: var(--ink); box-shadow: 0 0 0 100vmax var(--ink), 0 1px 0 100vmax var(--line-2); clip-path: inset(0 -100vmax -1px); margin-bottom: 12px; }
+.top__mine { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; font-size: 14px; color: var(--muted); }
+.top__mine:hover { color: var(--paper); }
+/* во время перелёта касания проходят сквозь слой анимации к уже обновлённым кнопкам */
+::view-transition { pointer-events: none; }
+html.vt-sheet::view-transition-group(*) { animation-duration: .36s; }
